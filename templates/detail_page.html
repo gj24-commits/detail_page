@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --primary:#2B8C76; --primary-light:#E8F5F1;
+  --accent:#E07A3F; --accent-light:#FFF0E6;
+  --bg-sky:#E3F0FA; --bg-warm:#FFF9E6; --bg-green:#E8F5F1;
+  --bg-dark:#2C3E50; --white:#FFFFFF;
+  --text-dark:#2C2218; --text-mid:#5C4A3A; --text-light:#8C7A6A;
+  --border-dash:#B8D4E3;
+}
+body { font-family:'Noto Sans KR',sans-serif; background:var(--bg-sky); width:1080px; color:var(--text-dark); line-height:1.7; }
+
+/* ── 히어로 ── */
+.hero { position:relative; width:1080px; height:720px; overflow:hidden; }
+.hero-image { width:100%; height:100%; object-fit:cover; }
+.hero-overlay { position:absolute; inset:0; background:linear-gradient(to bottom,rgba(0,0,0,0.05) 0%,rgba(0,0,0,0.65) 100%); }
+.hero-content { position:absolute; bottom:100px; left:0; right:0; text-align:center; color:#fff; }
+.hero-eyebrow { font-size:18px; font-weight:400; opacity:0.8; letter-spacing:2px; margin-bottom:12px; }
+.hero-title { font-size:54px; font-weight:900; line-height:1.25; margin-bottom:16px; text-shadow:0 2px 20px rgba(0,0,0,0.3); }
+.hero-subtitle { font-size:19px; font-weight:300; opacity:0.85; line-height:1.7; }
+.info-bar { display:flex; justify-content:center; background:rgba(0,0,0,0.75); backdrop-filter:blur(10px); }
+.info-bar-item { flex:1; text-align:center; padding:20px; border-right:1px solid rgba(255,255,255,0.15); color:#fff; }
+.info-bar-item:last-child { border-right:none; }
+.info-bar-label { font-size:11px; opacity:0.6; letter-spacing:2px; margin-bottom:4px; }
+.info-bar-value { font-size:17px; font-weight:700; }
+
+/* ── 공통 ── */
+.section { padding:70px 80px; }
+.section-sky { background:var(--bg-sky); }
+.section-white { background:var(--white); }
+.section-warm { background:var(--bg-warm); }
+.section-green { background:var(--bg-green); }
+.section-dark { background:var(--bg-dark); color:#fff; }
+.c-primary { color:var(--primary); }
+.c-accent { color:var(--accent); }
+.big-title { font-size:38px; font-weight:900; line-height:1.4; margin-bottom:18px; }
+.mid-title { font-size:26px; font-weight:700; line-height:1.4; margin-bottom:14px; }
+.desc { font-size:17px; color:var(--text-mid); line-height:1.85; }
+.label { font-size:13px; font-weight:700; color:var(--primary); letter-spacing:2px; margin-bottom:10px; }
+.center { text-align:center; }
+
+/* ── 인용 블록 ── */
+.quote-block { border-left:4px solid var(--primary); padding:22px 28px; margin:24px 0; background:rgba(255,255,255,0.7); border-radius:0 14px 14px 0; font-size:17px; color:var(--text-mid); line-height:1.85; }
+
+/* ── 추천 대상 카드 ── */
+.target-cards { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin-top:36px; }
+.target-card { background:var(--white); border-radius:18px; padding:28px; box-shadow:0 2px 12px rgba(0,0,0,0.06); text-align:center; }
+.target-num { width:44px; height:44px; border-radius:50%; background:var(--accent); color:#fff; font-weight:900; font-size:18px; display:flex; align-items:center; justify-content:center; margin:0 auto 14px; }
+.target-text { font-size:16px; color:var(--text-mid); line-height:1.65; }
+
+/* ── 포토 (둥근 모서리) ── */
+.photo-rounded { width:100%; border-radius:24px; overflow:hidden; margin:30px 0; }
+.photo-rounded img { width:100%; display:block; }
+.photo-full { width:100%; overflow:hidden; }
+.photo-full img { width:100%; height:420px; object-fit:cover; display:block; }
+.photo-full .photo-ph { width:100%; height:420px; background:linear-gradient(135deg,#c8d6e0,#a8b8c8); }
+
+/* ── 포토 스트립 ── */
+.photo-strip-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:4px; }
+.photo-strip-3 img { width:100%; height:340px; object-fit:cover; display:block; }
+.photo-strip-3 .photo-ph { width:100%; height:340px; background:linear-gradient(135deg,#c8d6e0,#a8b8c8); display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,0.4); font-size:13px; }
+.photo-strip-2 { display:grid; grid-template-columns:1.3fr 1fr; gap:4px; }
+.photo-strip-2 img { width:100%; height:380px; object-fit:cover; display:block; }
+.photo-strip-2 .photo-ph { width:100%; height:380px; background:linear-gradient(135deg,#c8d6e0,#a8b8c8); display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,0.4); font-size:13px; }
+
+/* ── 정보 그리드 (점선) ── */
+.info-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin:36px 0; }
+.info-grid-item { border:2px dashed var(--border-dash); border-radius:18px; padding:26px 20px; text-align:center; background:var(--white); }
+.info-grid-icon { font-size:22px; margin-bottom:8px; }
+.info-grid-label { font-size:13px; color:var(--text-light); margin-bottom:4px; }
+.info-grid-value { font-size:19px; font-weight:900; color:var(--text-dark); }
+
+/* ── 프로그램 카드 (세로 큰 카드) ── */
+.program-card { background:var(--white); border-radius:24px; overflow:hidden; margin-bottom:36px; box-shadow:0 4px 24px rgba(0,0,0,0.08); }
+.program-card-photo { height:380px; overflow:hidden; }
+.program-card-photo img { width:100%; height:100%; object-fit:cover; display:block; }
+.program-card-photo-ph { width:100%; height:100%; background:linear-gradient(135deg,#c8d6e0,#a8b8c8); display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,0.5); font-size:16px; }
+.program-card-body { padding:36px 40px; }
+.program-card-tag { display:inline-block; background:var(--primary); color:#fff; font-size:13px; font-weight:700; padding:5px 18px; border-radius:50px; margin-bottom:14px; }
+.program-card-title { font-size:26px; font-weight:900; margin-bottom:14px; }
+.program-card-quote { font-size:18px; color:var(--accent); font-weight:700; margin-bottom:16px; line-height:1.5; }
+.program-card-desc { font-size:16px; color:var(--text-mid); line-height:1.85; }
+
+/* ── 패키지 ── */
+.package-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-top:32px; }
+.package-card { background:var(--white); border-radius:20px; overflow:hidden; box-shadow:0 3px 16px rgba(0,0,0,0.07); }
+.package-photo { height:200px; overflow:hidden; }
+.package-photo img { width:100%; height:100%; object-fit:cover; display:block; }
+.package-photo-ph { width:100%; height:100%; background:linear-gradient(135deg,#c8d6e0,#a8b8c8); display:flex; align-items:center; justify-content:center; font-size:36px; }
+.package-body { padding:22px; text-align:center; }
+.package-title { font-size:18px; font-weight:900; margin-bottom:6px; }
+.package-desc { font-size:14px; color:var(--text-mid); line-height:1.6; }
+
+/* ── 업무공간 ── */
+.workspace-photo { width:100%; height:420px; border-radius:24px; overflow:hidden; margin:30px 0; }
+.workspace-photo img { width:100%; height:100%; object-fit:cover; display:block; }
+.workspace-photo-ph { width:100%; height:100%; background:linear-gradient(135deg,#1E3A35,#2D5C53); display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,0.4); font-size:14px; }
+.office-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:24px; }
+.office-item { background:var(--white); border-radius:16px; padding:22px; display:flex; gap:14px; align-items:flex-start; box-shadow:0 2px 10px rgba(0,0,0,0.05); }
+.office-icon { font-size:24px; flex-shrink:0; }
+.office-text h4 { font-size:15px; font-weight:700; margin-bottom:3px; }
+.office-text p { font-size:14px; color:var(--text-mid); line-height:1.6; }
+
+/* ── 타임라인 일정 ── */
+.timeline { margin:40px 0; padding:0 20px; }
+.timeline-day { margin-bottom:44px; }
+.timeline-day-label { display:inline-block; font-size:22px; font-weight:900; color:var(--accent); margin-bottom:20px; padding:6px 20px; background:var(--accent-light); border-radius:50px; }
+.timeline-items { position:relative; padding-left:44px; border-left:3px solid var(--accent); margin-left:8px; }
+.timeline-item { position:relative; padding:10px 0 28px; }
+.timeline-item::before { content:''; position:absolute; left:-50px; top:14px; width:14px; height:14px; background:var(--accent); border-radius:50%; border:3px solid var(--bg-sky); }
+.timeline-time { font-size:18px; font-weight:900; color:var(--text-dark); margin-bottom:4px; }
+.timeline-text { font-size:16px; color:var(--text-mid); line-height:1.65; }
+.timeline-badge { display:inline-block; font-size:11px; font-weight:700; padding:2px 10px; border-radius:50px; margin-right:6px; }
+.timeline-badge.parent { background:#E8F5F3; color:var(--primary); }
+.timeline-badge.child { background:var(--accent-light); color:var(--accent); }
+.timeline-badge.free { background:#F0F0F0; color:#888; }
+
+/* ── 숙소 ── */
+.hotel-photo-row { display:grid; gap:6px; margin:30px 0; border-radius:24px; overflow:hidden; }
+.hotel-photo-row.cols-2 { grid-template-columns:1fr 1fr; }
+.hotel-photo-row.cols-3 { grid-template-columns:1fr 1fr 1fr; }
+.hotel-photo-row img { width:100%; height:300px; object-fit:cover; display:block; }
+.hotel-card { background:var(--bg-dark); border-radius:24px; padding:40px; color:#fff; margin:24px 0; }
+.hotel-name { font-size:28px; font-weight:900; margin-bottom:8px; }
+.hotel-addr { font-size:15px; opacity:0.7; margin-bottom:20px; }
+.hotel-tags { display:flex; flex-wrap:wrap; gap:10px; }
+.hotel-tag { background:rgba(255,255,255,0.15); border-radius:50px; padding:6px 16px; font-size:13px; }
+.hotel-details { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:24px 0; }
+.hotel-detail-item { background:var(--white); border-radius:16px; padding:22px; }
+.hotel-detail-icon { font-size:26px; margin-bottom:6px; }
+.hotel-detail-title { font-size:15px; font-weight:700; margin-bottom:4px; }
+.hotel-detail-desc { font-size:14px; color:var(--text-mid); line-height:1.6; }
+.room-types { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:20px; }
+.room-card { background:var(--white); border-radius:14px; padding:22px; border-left:4px solid var(--primary); }
+.room-card-title { font-size:16px; font-weight:700; margin-bottom:4px; }
+.room-card-cap { font-size:14px; color:var(--text-mid); }
+
+/* ── 포함/불포함 ── */
+.include-grid { display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-top:32px; }
+.include-box { border-radius:20px; padding:28px; }
+.include-box.in { background:#E8F5F1; border:2px solid var(--primary); }
+.include-box.out { background:#FDF5F5; border:2px solid #E07A7A; }
+.include-title { font-size:18px; font-weight:900; margin-bottom:16px; }
+.include-box.in .include-title { color:var(--primary); }
+.include-box.out .include-title { color:#C05858; }
+.include-list { list-style:none; display:flex; flex-direction:column; gap:8px; }
+.include-list li { font-size:15px; color:var(--text-mid); padding-left:22px; position:relative; line-height:1.6; }
+.include-box.in .include-list li::before { content:'✓'; position:absolute; left:0; color:var(--primary); font-weight:700; }
+.include-box.out .include-list li::before { content:'✗'; position:absolute; left:0; color:#C05858; font-weight:700; }
+
+/* ── 환불 ── */
+.refund-box { background:var(--white); border-radius:20px; padding:32px; margin-top:32px; box-shadow:0 2px 12px rgba(0,0,0,0.06); }
+.refund-row { display:flex; justify-content:space-between; padding:14px 0; border-bottom:1px solid #f0ebe6; font-size:16px; }
+.refund-row:last-child { border-bottom:none; }
+.refund-pct { font-weight:900; color:var(--accent); }
+.caution-list { margin-top:24px; display:flex; flex-direction:column; gap:10px; }
+.caution-item { display:flex; gap:10px; font-size:14px; color:var(--text-mid); line-height:1.65; }
+.caution-item::before { content:'⚠️'; flex-shrink:0; }
+
+/* ── 참여 절차 ── */
+.process-steps { display:flex; gap:0; margin-top:40px; position:relative; }
+.process-steps::before { content:''; position:absolute; top:40px; left:60px; right:60px; height:2px; background:linear-gradient(to right,var(--primary),var(--accent)); z-index:0; }
+.step { flex:1; text-align:center; position:relative; z-index:1; }
+.step-circle { width:80px; height:80px; border-radius:50%; background:#fff; border:3px solid var(--primary); display:flex; align-items:center; justify-content:center; margin:0 auto 14px; font-size:26px; box-shadow:0 3px 12px rgba(0,0,0,0.08); }
+.step-num { position:absolute; top:-4px; right:calc(50% - 44px); width:22px; height:22px; background:var(--accent); color:#fff; border-radius:50%; font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; }
+.step-title { font-size:15px; font-weight:700; margin-bottom:5px; }
+.step-desc { font-size:13px; color:var(--text-mid); line-height:1.6; }
+
+/* ── CTA ── */
+.cta-section { background:var(--bg-dark); padding:80px; text-align:center; color:#fff; }
+.cta-title { font-size:44px; font-weight:900; margin-bottom:14px; line-height:1.3; }
+.cta-sub { font-size:18px; opacity:0.65; margin-bottom:40px; }
+.cta-btn { display:inline-block; background:var(--accent); color:#fff; font-size:20px; font-weight:700; padding:18px 54px; border-radius:50px; text-decoration:none; }
+.cta-contact { margin-top:40px; }
+.contact-value { font-size:16px; opacity:0.8; }
+
+/* ── 푸터 ── */
+.footer { background:#111; padding:30px 80px; display:flex; justify-content:space-between; align-items:center; }
+.footer-brand { font-size:22px; font-weight:700; color:#fff; }
+.footer-right { font-size:13px; color:rgba(255,255,255,0.4); text-align:right; line-height:1.8; }
+</style>
+</head>
+<body>
+
+<!-- ① 히어로 -->
+<section class="hero">
+  {% if hero_image %}<img class="hero-image" src="{{ hero_image }}" alt="">{% else %}<div style="width:100%;height:100%;background:linear-gradient(135deg,#2C3E50,#3B7A6E);"></div>{% endif %}
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">{{ badge }}</div>
+    <div class="hero-title">{{ title }}</div>
+    <div class="hero-subtitle">{{ subtitle }}</div>
+  </div>
+</section>
+<div class="info-bar">
+  {% if schedule_summary %}<div class="info-bar-item"><div class="info-bar-label">일정</div><div class="info-bar-value">{{ schedule_summary }}</div></div>{% endif %}
+  {% if location_summary %}<div class="info-bar-item"><div class="info-bar-label">장소</div><div class="info-bar-value">{{ location_summary }}</div></div>{% endif %}
+  {% if target_age %}<div class="info-bar-item"><div class="info-bar-label">자녀 연령</div><div class="info-bar-value">{{ target_age }}</div></div>{% endif %}
+  {% if capacity %}<div class="info-bar-item"><div class="info-bar-label">모집 규모</div><div class="info-bar-value">{{ capacity }}</div></div>{% endif %}
+  {% if price_summary %}<div class="info-bar-item"><div class="info-bar-label">참가비</div><div class="info-bar-value">{{ price_summary }}</div></div>{% endif %}
+</div>
+
+<!-- ② 스토리 인트로 -->
+<section class="section section-sky center">
+  <div class="big-title"><span class="c-primary">역사의 가치를 더하다,</span><br>크리에이티브 경주</div>
+  <div class="quote-block" style="text-align:left;max-width:780px;margin:24px auto;">
+    수많은 역사 유적과 문화가 살아 숨 쉬는 경주에서,<br>
+    부모님은 온전히 업무에 집중하고<br>
+    아이들은 특별한 역사 체험을 만나는 시간.<br>
+    이곳이 당신에게 <strong>일과 육아의 균형</strong>을 되찾아줄 거예요.
+  </div>
+  <p style="font-size:20px;font-weight:700;margin-top:50px;">이제, <span class="c-accent">우리 아이와 함께</span><br>경주로 <span class="c-accent">영감 가득한 여정</span>을 떠나보세요.</p>
+</section>
+
+<!-- ③ 추천 대상 -->
+{% if target_list %}
+<section class="section section-white">
+  <div class="center">
+    <div class="label">FOR WHO</div>
+    <div class="big-title">이런 분들께 <span class="c-accent">딱 맞습니다</span></div>
+  </div>
+  <div class="target-cards">
+    {% for t in target_list %}
+    <div class="target-card">
+      <div class="target-num">{{ loop.index }}</div>
+      <div class="target-text">{{ t }}</div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<!-- ④ 포토 스트립 -->
+<div class="photo-strip-3">
+  {% if images|length > 1 %}<img src="{{ images[1] }}" alt="">{% else %}<div class="photo-ph">현장 사진</div>{% endif %}
+  {% if images|length > 2 %}<img src="{{ images[2] }}" alt="">{% else %}<div class="photo-ph">현장 사진</div>{% endif %}
+  {% if images|length > 3 %}<img src="{{ images[3] }}" alt="">{% else %}<div class="photo-ph">현장 사진</div>{% endif %}
+</div>
+
+<!-- ⑤ 숙소 안내 -->
+<section class="section section-white">
+  <div class="label">ACCOMMODATION</div>
+  <div class="big-title"><span class="c-primary">나만의 창작과 영감을 위한 공간</span></div>
+  <p class="desc">아름다운 경주의 역사를 품은 숙소에서, 밖을 바라보는 것만으로도 영감이 채워지는 하루</p>
+
+  {% if hotel_images %}
+  <div class="hotel-photo-row cols-{{ hotel_images|length if hotel_images|length <= 3 else 3 }}">
+    {% for img in hotel_images[:3] %}
+    <img src="{{ img }}" alt="숙소 사진">
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="hotel-card">
+    <div class="hotel-name">경주 신라레거시호텔</div>
+    <div class="hotel-addr">📍 경북 경주시 원효로 14-1</div>
+    <div class="hotel-tags">
+      <span class="hotel-tag">🏰 황리단길 도보 5분</span>
+      <span class="hotel-tag">🗼 첨성대 도보 5분</span>
+      <span class="hotel-tag">🧒 키즈프렌들리</span>
+      <span class="hotel-tag">💻 워케이션 전용 센터</span>
+    </div>
+  </div>
+
+  <div class="hotel-details">
+    {% for item in location_details %}
+    <div class="hotel-detail-item">
+      <div class="hotel-detail-icon">{{ item.icon }}</div>
+      <div class="hotel-detail-title">{{ item.title }}</div>
+      <div class="hotel-detail-desc">{{ item.desc }}</div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% if room_types %}
+  <div class="mid-title" style="margin-top:28px;">객실 유형</div>
+  <div class="room-types">
+    {% for room in room_types %}
+    <div class="room-card">
+      <div class="room-card-title">{{ room.name }}</div>
+      <div class="room-card-cap">최대 {{ room.capacity }}인 입실</div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</section>
+
+<!-- ⑥ 업무 공간 -->
+<section class="section section-sky">
+  <div class="label">WORKSPACE</div>
+  <div class="big-title"><span class="c-primary">부모님을 위한 업무 공간</span></div>
+  <div class="quote-block">
+    탁 트인 워케이션 센터에서 머물고, 일하고, 창작하며<br>
+    새로운 영감을 얻어보세요. 이곳이 당신에게 온전한 집중과<br>
+    여유를 되찾을 수 있는 시간을 만들어줄거에요.
+  </div>
+  <div class="workspace-photo">
+    {% if workspace_image %}<img src="{{ workspace_image }}" alt="업무 공간">{% else %}<div class="workspace-photo-ph">업무 공간 사진</div>{% endif %}
+  </div>
+  <div class="office-grid">
+    {% for spec in office_specs %}
+    <div class="office-item">
+      <span class="office-icon">{{ spec.icon }}</span>
+      <div class="office-text"><h4>{{ spec.title }}</h4><p>{{ spec.desc }}</p></div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- ⑦ 아이 프로그램 인트로 -->
+<section class="section section-warm center">
+  <div class="big-title">그동안 <span class="c-accent">아이는</span><br><span class="c-accent">어떤 하루</span>를 보낼까요?</div>
+  <p class="desc" style="max-width:700px;margin:0 auto;">아이도 경주를 탐험하며 성장합니다.</p>
+  <div class="quote-block" style="text-align:left;max-width:780px;margin:30px auto;">
+    두런쌤과 함께 경주의 역사, 자연과 문화를 만나며<br>
+    마음껏 뛰놀고, 예술과 놀이가 어우러진 하루 속에서<br>
+    감각을 깨우고 세계를 넓혀갑니다.
+  </div>
+  <div class="info-grid" style="max-width:920px;margin:40px auto 0;">
+    <div class="info-grid-item">
+      <div class="info-grid-icon">👧</div>
+      <div class="info-grid-label">참여 가능 인원</div>
+      <div class="info-grid-value">{{ capacity }}</div>
+    </div>
+    <div class="info-grid-item">
+      <div class="info-grid-icon">📸</div>
+      <div class="info-grid-label">부모 안심 서비스</div>
+      <div class="info-grid-value">실시간 사진, 상황 공유</div>
+    </div>
+    <div class="info-grid-item">
+      <div class="info-grid-icon">🎂</div>
+      <div class="info-grid-label">참여 가능 나이</div>
+      <div class="info-grid-value">{{ target_age }}</div>
+    </div>
+    <div class="info-grid-item">
+      <div class="info-grid-icon">⏰</div>
+      <div class="info-grid-label">프로그램 시간</div>
+      <div class="info-grid-value">오전 10시 ~ 오후 6시</div>
+    </div>
+    <div class="info-grid-item">
+      <div class="info-grid-icon">🌳</div>
+      <div class="info-grid-label">야외 프로그램 장소</div>
+      <div class="info-grid-value">대릉원, 첨성대 일대</div>
+    </div>
+    <div class="info-grid-item">
+      <div class="info-grid-icon">🏠</div>
+      <div class="info-grid-label">실내 프로그램 장소</div>
+      <div class="info-grid-value">신라레거시호텔 내</div>
+    </div>
+  </div>
+</section>
+
+<!-- ⑧ 프로그램 카드 -->
+{% if program %}
+<section class="section section-sky">
+  <div class="center" style="margin-bottom:40px;">
+    <div class="label">CHILDREN'S PROGRAM</div>
+    <div class="big-title">프로그램 소개</div>
+    <p style="font-size:16px;color:var(--text-mid);">만족도 99.4% · 발도르프 기반 · 경주 역사 특화 6종</p>
+  </div>
+  {% for p in program %}
+  <div class="program-card">
+    <div class="program-card-photo">
+      {% if images|length > (loop.index + 4) %}
+        <img src="{{ images[loop.index + 4] }}" alt="{{ p.title }}">
+      {% elif images|length > loop.index %}
+        <img src="{{ images[loop.index] }}" alt="{{ p.title }}">
+      {% else %}
+        <div class="program-card-photo-ph">{{ p.title }}</div>
+      {% endif %}
+    </div>
+    <div class="program-card-body">
+      <span class="program-card-tag">PROGRAM {{ "%02d"|format(loop.index) }}</span>
+      <div class="program-card-title">{{ p.title }}</div>
+      <div class="program-card-desc">{{ p.desc }}</div>
+    </div>
+  </div>
+  {% endfor %}
+  <div style="background:var(--white);border-radius:16px;padding:22px 28px;font-size:15px;color:var(--text-mid);line-height:1.8;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,0.05);">
+    💡 <strong>아이돌봄 현황 공유 단톡방</strong>이 운영됩니다 — 야외 출발·도착 30분 전 알림 + 실내 활동 현황 실시간 공유
+  </div>
+</section>
+{% endif %}
+
+<!-- ⑨ 패키지 구성 -->
+{% if package_items %}
+<section class="section section-white">
+  <div class="center">
+    <div class="label">PACKAGE</div>
+    <div class="big-title">패키지 구성</div>
+  </div>
+  <div class="package-grid">
+    {% for item in package_items %}
+    <div class="package-card">
+      <div class="package-photo">
+        {% if package_images and package_images|length > loop.index0 %}
+          <img src="{{ package_images[loop.index0] }}" alt="{{ item.title }}">
+        {% else %}
+          <div class="package-photo-ph">{{ item.icon }}</div>
+        {% endif %}
+      </div>
+      <div class="package-body">
+        <div class="package-title">{{ item.title }}</div>
+        <div class="package-desc">{{ item.desc }}</div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<!-- ⑩ 시간표 (타임라인) -->
+<section class="section section-sky">
+  <div class="center" style="margin-bottom:10px;">
+    <div class="label">TIMETABLE</div>
+    <div class="big-title">프로그램 일정</div>
+    <p class="desc">부모님 업무 시간과 아이 프로그램 시간이 어떻게 운영되는지 한눈에 확인하세요.</p>
+  </div>
+  <div class="timeline">
+    {% for day in timetable_days %}
+    <div class="timeline-day">
+      <div class="timeline-day-label">{{ day.name }}</div>
+      <div class="timeline-items">
+        {% for slot in day.slots %}
+        <div class="timeline-item">
+          <div class="timeline-time">{{ slot.time }}</div>
+          <div class="timeline-text">
+            {% for entry in slot.entries %}
+            <div style="{% if not loop.first %}margin-top:8px;{% endif %}">
+              <span class="timeline-badge {{ entry.type }}">{{ entry.label }}</span>
+              {{ entry.text }}
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  <p style="text-align:center;font-size:14px;color:var(--text-light);margin-top:10px;">* 날씨·계절에 따라 야외/실내 프로그램 순서가 변경될 수 있습니다.</p>
+</section>
+
+<!-- ⑪ 포함/불포함 -->
+<section class="section section-white">
+  <div class="center">
+    <div class="label">INCLUDED</div>
+    <div class="big-title">포함 / 불포함 안내</div>
+  </div>
+  <div class="include-grid">
+    {% if included %}
+    <div class="include-box in">
+      <div class="include-title">✅ 포함 사항</div>
+      <ul class="include-list">{% for i in included %}<li>{{ i }}</li>{% endfor %}</ul>
+    </div>
+    {% endif %}
+    {% if excluded %}
+    <div class="include-box out">
+      <div class="include-title">❌ 불포함 사항</div>
+      <ul class="include-list">{% for i in excluded %}<li>{{ i }}</li>{% endfor %}</ul>
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+<!-- ⑫ 참여 절차 -->
+<section class="section section-sky">
+  <div class="center">
+    <div class="label">HOW TO APPLY</div>
+    <div class="big-title">참여 신청 절차</div>
+  </div>
+  <div class="process-steps">
+    {% for step in process_steps %}
+    <div class="step">
+      <div class="step-circle">
+        <span class="step-num">{{ loop.index }}</span>
+        {{ step.icon }}
+      </div>
+      <div class="step-title">{{ step.title }}</div>
+      <div class="step-desc">{{ step.desc }}</div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- ⑬ 환불 규정 -->
+<section class="section section-white">
+  <div class="center">
+    <div class="label">REFUND POLICY</div>
+    <div class="big-title">환불 규정</div>
+  </div>
+  <div class="refund-box">
+    {% for row in refund_rows %}
+    <div class="refund-row">
+      <span>{{ row.timing }}</span>
+      <span class="refund-pct">{{ row.amount }}</span>
+    </div>
+    {% endfor %}
+  </div>
+  <div class="caution-list">
+    {% for c in cautions %}
+    <div class="caution-item">{{ c }}</div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- ⑭ CTA -->
+<section class="cta-section">
+  <div class="cta-title">지금 바로<br>신청하세요!</div>
+  <div class="cta-sub">{{ cta_subtitle }}</div>
+  {% if booking_link %}<a class="cta-btn" href="{{ booking_link }}">신청하기</a>{% else %}<div class="cta-btn" style="cursor:default;">신청 링크 준비중</div>{% endif %}
+  <div class="cta-contact">
+    <div class="contact-value">카카오톡 · 다리메이커 카카오톡 채널</div>
+  </div>
+</section>
+
+<!-- 푸터 -->
+<footer class="footer">
+  <div class="footer-brand">두런두런</div>
+  <div class="footer-right">드라이메이커 · contact@darimaker.com<br>일·가정 양립을 위한 가족친화 복지 서비스</div>
+</footer>
+
+</body>
+</html>
