@@ -2,10 +2,10 @@
 =======================================================
 
 [패밀리 워케이션] 두런두런 패밀리 워케이션 경주 신라레거시점
-https://gj24-commits.github.io/detail_page/상세페이지/silla-family-reservation.html
+https://reservation.drdrfamily.com/상세페이지/silla-family/
 
 [워케이션] 두런두런 워케이션 경주 신라레거시점
-https://gj24-commits.github.io/detail_page/상세페이지/silla-reservation.html
+https://reservation.drdrfamily.com/상세페이지/silla/
 
 -------------------------------------------------------
 응답 데이터 저장 스프레드시트

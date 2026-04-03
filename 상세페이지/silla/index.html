@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>예약 문의 | 두런두런 워케이션 경주 신라레거시점</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Noto Sans KR', sans-serif; color: #333; background: #f5f7f6; min-height: 100vh; }
+
+    /* Header */
+    .form-header {
+      background: linear-gradient(135deg, #1a5c3a, #2d8a5e);
+      color: #fff;
+      padding: 40px 20px;
+      text-align: center;
+    }
+    .form-header h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+    .form-header p { font-size: 15px; opacity: 0.9; }
+    /* Form container */
+    .form-container {
+      max-width: 680px;
+      margin: -30px auto 40px;
+      position: relative;
+    }
+
+    /* Form sections */
+    .form-section {
+      background: #fff;
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 16px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+    .form-section h2 {
+      font-size: 20px;
+      font-weight: 600;
+      color: #1a5c3a;
+      margin-bottom: 6px;
+    }
+    .form-section .section-desc {
+      font-size: 13px;
+      color: #888;
+      margin-bottom: 24px;
+    }
+
+    /* Form fields */
+    .field { margin-bottom: 24px; }
+    .field:last-child { margin-bottom: 0; }
+    .field label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 8px;
+      color: #333;
+    }
+    .field label .required {
+      color: #e53935;
+      margin-left: 2px;
+    }
+    .field label .optional {
+      color: #999;
+      font-weight: 400;
+      font-size: 12px;
+      margin-left: 4px;
+    }
+    .field input[type="text"],
+    .field input[type="tel"],
+    .field input[type="number"],
+    .field select,
+    .field textarea {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 15px;
+      font-family: inherit;
+      transition: border-color 0.2s;
+      background: #fff;
+    }
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+      outline: none;
+      border-color: #2d8a5e;
+      box-shadow: 0 0 0 3px rgba(45,138,94,0.1);
+    }
+    .field textarea { resize: vertical; min-height: 80px; }
+    .field .hint {
+      font-size: 12px;
+      color: #999;
+      margin-top: 4px;
+    }
+
+    /* Radio & Checkbox */
+    .radio-group, .checkbox-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .radio-group.horizontal, .checkbox-group.horizontal {
+      flex-direction: row;
+      gap: 20px;
+    }
+    .radio-group label, .checkbox-group label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 400;
+      cursor: pointer;
+      margin-bottom: 0;
+    }
+    .radio-group input, .checkbox-group input {
+      width: 18px;
+      height: 18px;
+      accent-color: #1a5c3a;
+    }
+
+    /* Person card */
+    .person-card {
+      background: #f8faf9;
+      border: 1px solid #e0e8e3;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 12px;
+      position: relative;
+    }
+    .person-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      font-size: 15px;
+      font-weight: 600;
+      color: #1a5c3a;
+    }
+    .person-fields {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .person-fields input[type="text"],
+    .person-fields input[type="tel"] {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      background: #fff;
+    }
+    .person-fields input:focus {
+      outline: none;
+      border-color: #2d8a5e;
+      box-shadow: 0 0 0 3px rgba(45,138,94,0.1);
+    }
+    .btn-add {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 10px 20px;
+      background: #fff;
+      border: 1px dashed #2d8a5e;
+      border-radius: 8px;
+      color: #2d8a5e;
+      font-size: 14px;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-add:hover {
+      background: #e8f5e9;
+    }
+    .btn-remove {
+      background: none;
+      border: none;
+      color: #e53935;
+      font-size: 13px;
+      cursor: pointer;
+      font-family: inherit;
+      padding: 2px 8px;
+    }
+    .btn-remove:hover {
+      text-decoration: underline;
+    }
+
+    /* Calendar */
+    .calendar-wrapper {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .calendar-field { position: relative; }
+    .calendar-field input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 15px;
+      font-family: inherit;
+      cursor: pointer;
+    }
+    .calendar-field input:focus {
+      outline: none;
+      border-color: #2d8a5e;
+      box-shadow: 0 0 0 3px rgba(45,138,94,0.1);
+    }
+    .stay-info {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 6px 14px;
+      background: #e8f5e9;
+      color: #1a5c3a;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .stay-error {
+      background: #ffeaea;
+      color: #e53935;
+    }
+
+    /* Privacy box */
+    .privacy-box {
+      background: #f8f8f8;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 16px;
+      max-height: 150px;
+      overflow-y: auto;
+      font-size: 13px;
+      color: #666;
+      line-height: 1.7;
+      margin-bottom: 16px;
+    }
+
+    /* Submit */
+    .submit-wrapper { text-align: center; padding: 20px 0; }
+    .btn-submit {
+      display: inline-block;
+      background: linear-gradient(135deg, #1a5c3a, #2d8a5e);
+      color: #fff;
+      border: none;
+      padding: 16px 60px;
+      border-radius: 50px;
+      font-size: 17px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(26,92,58,0.3);
+    }
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(26,92,58,0.4);
+    }
+    .btn-submit:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-100px);
+      background: #1a5c3a;
+      color: #fff;
+      padding: 16px 32px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 500;
+      z-index: 1000;
+      transition: transform 0.4s ease;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+    .toast.error { background: #e53935; }
+
+    /* Success Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1001;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal-box {
+      background: #fff;
+      border-radius: 16px;
+      padding: 40px 32px;
+      max-width: 420px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.2);
+    }
+    .modal-icon {
+      width: 60px;
+      height: 60px;
+      background: #e8f5e9;
+      color: #1a5c3a;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+    .modal-box h3 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 12px;
+    }
+    .modal-box p {
+      font-size: 15px;
+      color: #666;
+      line-height: 1.7;
+      margin-bottom: 28px;
+    }
+    .btn-modal-close {
+      display: inline-block;
+      background: linear-gradient(135deg, #1a5c3a, #2d8a5e);
+      color: #fff;
+      border: none;
+      padding: 12px 40px;
+      border-radius: 50px;
+      font-size: 16px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .btn-modal-close:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 15px rgba(26,92,58,0.3);
+    }
+
+    /* Loading overlay */
+    .loading-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 999;
+      justify-content: center;
+      align-items: center;
+    }
+    .loading-overlay.show { display: flex; }
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid #fff;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Price section */
+    .price-breakdown {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .price-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      color: #555;
+      padding: 6px 0;
+    }
+    .price-row.sub { border-bottom: 1px solid #eee; }
+    .price-total {
+      display: flex;
+      justify-content: space-between;
+      font-size: 20px;
+      font-weight: 700;
+      color: #1a5c3a;
+      padding-top: 12px;
+      border-top: 2px solid #1a5c3a;
+    }
+
+    /* File upload */
+    .file-upload-area {
+      border: 2px dashed #ddd;
+      border-radius: 10px;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+    .file-upload-area:hover { border-color: #2d8a5e; }
+    .file-upload-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 30px 20px;
+      cursor: pointer;
+      color: #888;
+      font-size: 14px;
+    }
+    .file-icon { font-size: 28px; }
+    .file-types { font-size: 12px; color: #aaa; }
+    .file-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 20px;
+      background: #f0faf4;
+      font-size: 14px;
+      color: #1a5c3a;
+      font-weight: 500;
+      border-bottom: 1px solid #e0e8e3;
+    }
+    .file-item:last-child { border-bottom: none; }
+
+    /* Footer */
+    footer {
+      background: #222;
+      color: #999;
+      text-align: center;
+      padding: 30px 20px;
+      font-size: 13px;
+    }
+
+    @media (max-width: 768px) {
+      .form-section { padding: 24px 20px; }
+      .calendar-wrapper { grid-template-columns: 1fr; }
+      .form-header h1 { font-size: 22px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="form-header">
+    <h1>두런두런 워케이션</h1>
+    <p>경주 신라레거시점 예약 신청서</p>
+  </header>
+
+  <form id="reservationForm" class="form-container" novalidate>
+
+    <!-- 1. 개인정보 동의 -->
+    <div class="form-section">
+      <h2>개인정보 수집·이용 동의</h2>
+      <p class="section-desc">예약 진행을 위해 아래 내용에 동의해 주세요</p>
+
+      <div class="privacy-box">
+        <strong>[개인정보 수집·이용 동의]</strong><br><br>
+        1. 수집 항목: 이름, 연락처, 성별, 기업명, 숙박 인원 및 동반자 정보<br>
+        2. 수집 목적: 워케이션 패키지 예약 및 상담, 서비스 제공<br>
+        3. 보유 기간: 서비스 종료 후 1년간 보관 후 파기<br>
+        4. 동의를 거부할 권리가 있으며, 거부 시 예약이 제한될 수 있습니다.<br><br>
+        <strong>[마케팅 활용 동의]</strong><br>
+        수집된 정보는 두런두런의 워케이션 상품 안내 및 프로모션 정보 발송에 활용될 수 있습니다.
+      </div>
+
+      <div class="field">
+        <label>개인정보 수집·이용에 동의하십니까? <span class="required">*</span></label>
+        <div class="radio-group horizontal">
+          <label><input type="radio" name="privacyConsent" value="네" required> 네</label>
+          <label><input type="radio" name="privacyConsent" value="아니오"> 아니오</label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>광고성 정보 수신 동의 <span class="optional">(선택)</span></label>
+        <div class="radio-group horizontal">
+          <label><input type="radio" name="marketingConsent" value="네"> 네</label>
+          <label><input type="radio" name="marketingConsent" value="아니오"> 아니오</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. 신청자 정보 -->
+    <div class="form-section">
+      <h2>신청자 및 참여자 정보</h2>
+      <p class="section-desc">예약자 및 참여자 정보를 입력해 주세요</p>
+
+      <div class="field">
+        <label>기업명 <span class="required">*</span></label>
+        <input type="text" name="company" placeholder="소속 기업명을 입력해 주세요" required>
+      </div>
+
+      <div class="field">
+        <label>예약자명 <span class="required">*</span></label>
+        <input type="text" name="name" placeholder="예약자 이름" required>
+      </div>
+
+      <div class="field">
+        <label>성별 <span class="required">*</span></label>
+        <div class="radio-group horizontal">
+          <label><input type="radio" name="gender" value="남" required> 남</label>
+          <label><input type="radio" name="gender" value="여"> 여</label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>대표 연락처 <span class="required">*</span></label>
+        <input type="tel" name="phone" placeholder="010-0000-0000" required>
+      </div>
+
+      <div class="field">
+        <label>전체 숙박 인원 수 <span class="required">*</span></label>
+        <input type="number" name="totalGuests" placeholder="예: 2" min="1" required>
+      </div>
+
+      <!-- 참여자 정보 -->
+      <div class="field">
+        <label>참여자 정보 <span class="required">*</span></label>
+        <p class="hint" style="margin-bottom:12px;">참여자 정보를 모두 입력해 주세요</p>
+        <div id="guardianList">
+          <div class="person-card" data-index="0">
+            <div class="person-card-header">
+              <span>참여자 1</span>
+            </div>
+            <div class="person-fields">
+              <input type="text" name="guardian_name_0" placeholder="이름" required>
+              <input type="text" name="guardian_rrn_0" placeholder="주민번호 (000000-0000000)" required>
+              <input type="tel" name="guardian_phone_0" placeholder="연락처 (010-0000-0000)" required>
+              <input type="text" name="guardian_allergy_0" placeholder="알러지 (없으면 '없음')">
+              <div class="radio-group horizontal" style="padding:4px 0;">
+                <span style="font-size:14px;color:#555;">근무 여부:</span>
+                <label><input type="radio" name="guardian_work_0" value="근무" required> 근무</label>
+                <label><input type="radio" name="guardian_work_0" value="비근무"> 비근무</label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <button type="button" class="btn-add" onclick="addGuardian()">+ 참여자 추가</button>
+      </div>
+    </div>
+
+    <!-- 3. 숙소 및 일정 -->
+    <div class="form-section">
+      <h2>숙소 및 일정 예약</h2>
+      <p class="section-desc">객실 타입과 희망 일정을 선택해 주세요</p>
+
+      <div class="field">
+        <label>객실 타입 <span class="required">*</span></label>
+        <select name="roomType" required>
+          <option value="">객실을 선택해 주세요</option>
+          <option value="패밀리 노블 스위트">패밀리 노블 스위트</option>
+          <option value="패밀리 로얄 스위트">패밀리 로얄 스위트</option>
+          <option value="수페리어 스위트 (침대)">수페리어 스위트 (침대)</option>
+          <option value="수페리어 스위트 (다다미)">수페리어 스위트 (다다미)</option>
+          <option value="수페리어 풀 스위트 (침대)">수페리어 풀 스위트 (침대)</option>
+          <option value="수페리어 풀 스위트 (다다미)">수페리어 풀 스위트 (다다미)</option>
+          <option value="레지던셜 로얄 스위트">레지던셜 로얄 스위트</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>숙박 일정 <span class="required">*</span></label>
+        <div class="calendar-wrapper">
+          <div class="calendar-field">
+            <label style="font-size:12px;color:#888;margin-bottom:4px;">입실일</label>
+            <input type="date" id="checkIn" name="checkIn" required>
+          </div>
+          <div class="calendar-field">
+            <label style="font-size:12px;color:#888;margin-bottom:4px;">퇴실일</label>
+            <input type="date" id="checkOut" name="checkOut" required>
+          </div>
+        </div>
+        <div id="stayInfo"></div>
+        <p class="hint">2026년 4월 13일 ~ 11월 | 2박3일~3박4일 | 금~일 입실 불가 (토요일 퇴실만 가능)</p>
+      </div>
+
+      <div class="field">
+        <label>워케이션 센터 이용 일정 <span class="required">*</span></label>
+        <input type="text" name="workationSchedule" placeholder="예: 입실일~퇴실일 전일 09:00-18:00" required>
+      </div>
+
+    </div>
+
+    <!-- 4. 관광 프로그램 -->
+    <div class="form-section">
+      <h2>관광 프로그램 예약</h2>
+      <p class="section-desc">참여를 희망하는 관광 프로그램을 선택해 주세요</p>
+
+      <div class="field">
+        <label>관광 프로그램 <span class="optional">(선택)</span></label>
+        <div class="checkbox-group">
+          <label><input type="checkbox" name="tourProgram" value="정글미디어파크"> 정글미디어파크</label>
+          <label><input type="checkbox" name="tourProgram" value="경주 버드파크"> 경주 버드파크</label>
+          <label><input type="checkbox" name="tourProgram" value="경주엑스포대공원"> 경주엑스포대공원</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- 예상 가격 -->
+    <div class="form-section" id="priceSectionWrapper" style="display:none;">
+      <h2>예상 가격</h2>
+      <p class="section-desc">선택하신 옵션 기준 예상 금액입니다</p>
+      <div id="priceSection">
+        <div class="price-breakdown" id="priceBreakdown"></div>
+        <div class="price-total" id="priceTotal"></div>
+      </div>
+    </div>
+
+    <!-- 5. 경북형 워케이션 신청서 -->
+    <div class="form-section">
+      <h2>경북형 워케이션 신청서</h2>
+      <p class="section-desc">경북형 워케이션 신청서를 첨부해 주세요</p>
+      <div class="field">
+        <label>신청서 파일 업로드 <span class="required">*</span></label>
+        <div class="file-upload-area" id="fileUploadArea">
+          <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.hwp,.hwpx,.jpg,.jpeg,.png" multiple style="display:none">
+          <div class="file-upload-placeholder" id="filePlaceholder" onclick="document.getElementById('fileInput').click()">
+            <span class="file-icon">📎</span>
+            <span>클릭하여 파일을 선택하세요 (여러 개 가능)</span>
+            <span class="file-types">PDF, DOC, HWP, JPG, PNG (파일당 최대 10MB)</span>
+          </div>
+          <div id="fileList"></div>
+          <button type="button" class="btn-add" id="addMoreFiles" style="display:none" onclick="document.getElementById('fileInput').click()">+ 파일 추가</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. 기타 -->
+    <div class="form-section">
+      <h2>기타 문의사항</h2>
+      <div class="field">
+        <label>기타 문의 사항 <span class="optional">(선택)</span></label>
+        <textarea name="otherInquiry" placeholder="추가 문의 사항이 있으시면 자유롭게 작성해 주세요"></textarea>
+      </div>
+    </div>
+
+    <!-- Submit -->
+    <div class="submit-wrapper">
+      <button type="submit" class="btn-submit">예약 문의 제출</button>
+    </div>
+  </form>
+
+  <footer>
+    <p>&copy; 2026 두런두런 (DRDR Family). All rights reserved.</p>
+  </footer>
+
+  <!-- Toast -->
+  <div id="toast" class="toast"></div>
+
+  <!-- Success Modal -->
+  <div id="successModal" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-icon">&#10003;</div>
+      <h3>감사합니다</h3>
+      <p>예약 문의 제출이 완료되었습니다.<br>객실 확인 후 예약 가능시 결제링크가 송부됩니다.</p>
+      <button type="button" class="btn-modal-close" onclick="closeModal()">확인</button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div id="loading" class="loading-overlay">
+    <div class="spinner"></div>
+  </div>
+
+  <script>
+    // ===== 캘린더 날짜 제한 로직 =====
+    const checkInEl = document.getElementById('checkIn');
+    const checkOutEl = document.getElementById('checkOut');
+    const stayInfoEl = document.getElementById('stayInfo');
+
+    // 예약 가능 기간: 4/13 ~ 11/30
+    const SEASON_START = '2026-04-13';
+    const SEASON_END = '2026-11-30';
+    checkInEl.min = SEASON_START;
+    checkInEl.max = SEASON_END;
+    checkOutEl.min = SEASON_START;
+
+    // 입실 불가 요일: 금(5), 토(6), 일(0)
+    function isBlockedCheckIn(dateStr) {
+      const day = new Date(dateStr).getDay();
+      return day === 0 || day === 5 || day === 6;
+    }
+
+    checkInEl.addEventListener('change', () => {
+      if (isBlockedCheckIn(checkInEl.value)) {
+        showToast('금/토/일요일은 입실일로 선택할 수 없습니다.', true);
+        checkInEl.value = '';
+        checkOutEl.value = '';
+        checkOutEl.min = '';
+        checkOutEl.max = '';
+        stayInfoEl.innerHTML = '';
+        return;
+      }
+      const checkInDate = new Date(checkInEl.value);
+      // 퇴실 최소: 입실 + 2일 (2박), 최대: 입실 + 3일 (3박)
+      const minOut = new Date(checkInDate);
+      minOut.setDate(minOut.getDate() + 2);
+      const maxOut = new Date(checkInDate);
+      maxOut.setDate(maxOut.getDate() + 3);
+
+      checkOutEl.min = minOut.toISOString().split('T')[0];
+      // 퇴실 최대: 입실+3일이지만 시즌 종료일(+1일 퇴실) 넘지 않도록
+      const seasonEndDate = new Date(SEASON_END);
+      seasonEndDate.setDate(seasonEndDate.getDate() + 1);
+      const maxOutCapped = maxOut > seasonEndDate ? seasonEndDate : maxOut;
+      checkOutEl.max = maxOutCapped.toISOString().split('T')[0];
+
+      // 기존 퇴실일이 범위 밖이면 초기화
+      if (checkOutEl.value) {
+        const outDate = new Date(checkOutEl.value);
+        if (outDate < minOut || outDate > maxOut) {
+          checkOutEl.value = '';
+          stayInfoEl.innerHTML = '';
+        } else {
+          updateStayInfo();
+        }
+      }
+    });
+
+    checkOutEl.addEventListener('change', () => {
+      // 퇴실일: 일요일만 불가 (토요일 퇴실은 허용)
+      const day = new Date(checkOutEl.value).getDay();
+      if (day === 0) {
+        showToast('일요일은 퇴실일로 선택할 수 없습니다.', true);
+        checkOutEl.value = '';
+        stayInfoEl.innerHTML = '';
+        return;
+      }
+      updateStayInfo();
+    });
+
+    function updateStayInfo() {
+      if (!checkInEl.value || !checkOutEl.value) {
+        stayInfoEl.innerHTML = '';
+        return;
+      }
+      const inDate = new Date(checkInEl.value);
+      const outDate = new Date(checkOutEl.value);
+      const nights = Math.round((outDate - inDate) / (1000 * 60 * 60 * 24));
+
+      if (nights >= 2 && nights <= 3) {
+        stayInfoEl.innerHTML = `<span class="stay-info">${nights}박 ${nights + 1}일 선택됨</span>`;
+      } else {
+        stayInfoEl.innerHTML = `<span class="stay-info stay-error">2박~3박만 선택 가능합니다</span>`;
+      }
+    }
+
+    // ===== 보호자 추가/삭제 =====
+    let guardianCount = 1;
+    function addGuardian() {
+      const i = guardianCount++;
+      const list = document.getElementById('guardianList');
+      const card = document.createElement('div');
+      card.className = 'person-card';
+      card.dataset.index = i;
+      card.innerHTML = `
+        <div class="person-card-header">
+          <span>참여자 ${i + 1}</span>
+          <button type="button" class="btn-remove" onclick="removeCard(this)">삭제</button>
+        </div>
+        <div class="person-fields">
+          <input type="text" name="guardian_name_${i}" placeholder="이름" required>
+          <input type="text" name="guardian_rrn_${i}" placeholder="주민번호 (000000-0000000)" required>
+          <input type="tel" name="guardian_phone_${i}" placeholder="연락처 (010-0000-0000)" required>
+          <input type="text" name="guardian_allergy_${i}" placeholder="알러지 (없으면 '없음')">
+          <div class="radio-group horizontal" style="padding:4px 0;">
+            <span style="font-size:14px;color:#555;">근무 여부:</span>
+            <label><input type="radio" name="guardian_work_${i}" value="근무" required> 근무</label>
+            <label><input type="radio" name="guardian_work_${i}" value="비근무"> 비근무</label>
+          </div>
+        </div>`;
+      list.appendChild(card);
+      renumberCards('guardianList', '참여자');
+    }
+
+    function removeCard(btn) {
+      const card = btn.closest('.person-card');
+      card.remove();
+      renumberCards('guardianList', '참여자');
+    }
+
+    function renumberCards(listId, label) {
+      const cards = document.querySelectorAll(`#${listId} .person-card`);
+      cards.forEach((card, idx) => {
+        card.querySelector('.person-card-header span').textContent = `${label} ${idx + 1}`;
+      });
+    }
+
+    // ===== 참여자 데이터 수집 =====
+    function collectGuardians() {
+      const cards = document.querySelectorAll('#guardianList .person-card');
+      return Array.from(cards).map((card, idx) => {
+        const i = card.dataset.index;
+        return {
+          이름: form.querySelector(`[name="guardian_name_${i}"]`).value,
+          주민번호: form.querySelector(`[name="guardian_rrn_${i}"]`).value,
+          연락처: form.querySelector(`[name="guardian_phone_${i}"]`).value,
+          알러지: form.querySelector(`[name="guardian_allergy_${i}"]`)?.value || '',
+          근무여부: form.querySelector(`[name="guardian_work_${i}"]:checked`)?.value || ''
+        };
+      });
+    }
+
+    // ===== 가격 계산 =====
+    const ROOM_PRICES = {
+      '패밀리 노블 스위트':       { off: [130000, 160000, 210000], peak: [190000, 230000, 290000] },
+      '패밀리 로얄 스위트':       { off: [230000, 280000, 340000], peak: [300000, 340000, 450000] },
+      '수페리어 스위트 (침대)':    { off: [110000, 140000, 200000], peak: [160000, 190000, 240000] },
+      '수페리어 스위트 (다다미)':   { off: [110000, 140000, 200000], peak: [160000, 190000, 240000] },
+      '수페리어 풀 스위트 (침대)':  { off: [100000, 120000, 200000], peak: [150000, 180000, 230000] },
+      '수페리어 풀 스위트 (다다미)': { off: [100000, 120000, 200000], peak: [150000, 180000, 230000] },
+      '레지던셜 로얄 스위트':      { off: [280000, 330000, 400000], peak: [380000, 430000, 560000] }
+    };
+    const TOUR_PRICE_PER_PERSON = 20000;
+
+    const PEAK_DATES = new Set([
+      '2026-05-01','2026-05-02','2026-05-03','2026-05-04','2026-05-05',
+      '2026-05-22','2026-05-23','2026-05-24',
+      '2026-06-03','2026-06-04','2026-06-05','2026-06-06',
+      '2026-07-24','2026-07-25','2026-07-26','2026-07-27','2026-07-28','2026-07-29','2026-07-30','2026-07-31',
+      '2026-08-01','2026-08-02','2026-08-03','2026-08-04','2026-08-05','2026-08-06','2026-08-07','2026-08-08',
+      '2026-08-09','2026-08-10','2026-08-11','2026-08-12','2026-08-13','2026-08-14','2026-08-15','2026-08-16','2026-08-17',
+      '2026-09-23','2026-09-24','2026-09-25','2026-09-26','2026-09-27',
+      '2026-10-02','2026-10-03','2026-10-04','2026-10-08','2026-10-09','2026-10-10','2026-10-11',
+    ]);
+
+    function isPeakDate(dateStr) {
+      return PEAK_DATES.has(dateStr);
+    }
+
+    function getDayPriceIndex(dateStr) {
+      const day = new Date(dateStr).getDay();
+      if (day === 5) return 1;
+      if (day === 6) return 2;
+      return 0;
+    }
+
+    function calculatePrice() {
+      const wrapper = document.getElementById('priceSectionWrapper');
+      const breakdown = document.getElementById('priceBreakdown');
+      const totalEl = document.getElementById('priceTotal');
+      const roomType = form.roomType?.value;
+      const checkIn = checkInEl.value;
+      const checkOut = checkOutEl.value;
+
+      if (!roomType || !checkIn || !checkOut || !ROOM_PRICES[roomType]) {
+        wrapper.style.display = 'none';
+        return;
+      }
+
+      const inDate = new Date(checkIn);
+      const outDate = new Date(checkOut);
+      const nights = Math.round((outDate - inDate) / (1000 * 60 * 60 * 24));
+      if (nights < 2 || nights > 3) { wrapper.style.display = 'none'; return; }
+
+      const prices = ROOM_PRICES[roomType];
+      let roomTotal = 0;
+      let rows = '';
+
+      for (let i = 0; i < nights; i++) {
+        const nightDate = new Date(inDate);
+        nightDate.setDate(nightDate.getDate() + i);
+        const dateStr = nightDate.toISOString().split('T')[0];
+        const dayNames = ['일','월','화','수','목','금','토'];
+        const dayName = dayNames[nightDate.getDay()];
+        const peak = isPeakDate(dateStr);
+        const priceIdx = getDayPriceIndex(dateStr);
+        const nightPrice = peak ? prices.peak[priceIdx] : prices.off[priceIdx];
+        roomTotal += nightPrice;
+
+        const seasonLabel = peak ? '성수기' : '비수기';
+        const mm = nightDate.getMonth() + 1;
+        const dd = nightDate.getDate();
+        rows += `<div class="price-row sub"><span>${i+1}박 (${mm}/${dd} ${dayName} · ${seasonLabel})</span><span>${nightPrice.toLocaleString()}원</span></div>`;
+      }
+
+      const tourCount = form.querySelectorAll('input[name="tourProgram"]:checked').length;
+      const guestCount = parseInt(form.totalGuests?.value) || 0;
+      const tourTotal = tourCount * guestCount * TOUR_PRICE_PER_PERSON;
+
+      let total = roomTotal + tourTotal;
+
+      let html = `<div class="price-row" style="font-weight:600;color:#333;margin-bottom:4px;"><span>객실: ${roomType}</span></div>`;
+      html += rows;
+      html += `<div class="price-row"><span>객실 소계</span><span style="font-weight:500;">${roomTotal.toLocaleString()}원</span></div>`;
+
+      if (tourCount > 0 && guestCount > 0) {
+        html += `<div class="price-row"><span>관광 프로그램 ${tourCount}개 × ${guestCount}명 × 20,000원</span><span>${tourTotal.toLocaleString()}원</span></div>`;
+      }
+
+      breakdown.innerHTML = html;
+      totalEl.innerHTML = `<span>총 예상 금액</span><span>${total.toLocaleString()}원</span>`;
+      wrapper.style.display = 'block';
+    }
+
+    document.querySelector('[name="roomType"]')?.addEventListener('change', calculatePrice);
+    checkInEl.addEventListener('change', () => { setTimeout(calculatePrice, 100); });
+    checkOutEl.addEventListener('change', () => { setTimeout(calculatePrice, 100); });
+    document.querySelector('[name="totalGuests"]')?.addEventListener('input', calculatePrice);
+    document.querySelectorAll('input[name="tourProgram"]').forEach(el => el.addEventListener('change', calculatePrice));
+
+    // ===== 파일 업로드 (다중) =====
+    let uploadedFiles = [];
+    const fileInput = document.getElementById('fileInput');
+
+    fileInput.addEventListener('change', () => {
+      const newFiles = Array.from(fileInput.files);
+      for (const file of newFiles) {
+        if (file.size > 10 * 1024 * 1024) {
+          showToast(`${file.name}: 10MB 초과. 건너뜁니다.`, true);
+          continue;
+        }
+        if (!uploadedFiles.some(f => f.name === file.name && f.size === file.size)) {
+          uploadedFiles.push(file);
+        }
+      }
+      fileInput.value = '';
+      renderFileList();
+    });
+
+    function renderFileList() {
+      const list = document.getElementById('fileList');
+      const placeholder = document.getElementById('filePlaceholder');
+      const addBtn = document.getElementById('addMoreFiles');
+
+      if (uploadedFiles.length === 0) {
+        list.innerHTML = '';
+        placeholder.style.display = 'flex';
+        addBtn.style.display = 'none';
+        return;
+      }
+      placeholder.style.display = 'none';
+      addBtn.style.display = 'inline-block';
+      list.innerHTML = uploadedFiles.map((f, i) =>
+        `<div class="file-item"><span>${f.name}</span><button type="button" class="btn-remove" onclick="removeFile(${i})">삭제</button></div>`
+      ).join('');
+    }
+
+    function removeFile(index) {
+      uploadedFiles.splice(index, 1);
+      renderFileList();
+    }
+
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // ===== 폼 제출 =====
+    const form = document.getElementById('reservationForm');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      // 개인정보 동의 확인
+      const privacyConsent = form.querySelector('input[name="privacyConsent"]:checked');
+      if (!privacyConsent || privacyConsent.value !== '네') {
+        showToast('개인정보 수집·이용에 동의해 주세요.', true);
+        return;
+      }
+
+      // 날짜 유효성
+      if (checkInEl.value && checkOutEl.value) {
+        const inDate = new Date(checkInEl.value);
+        const outDate = new Date(checkOutEl.value);
+        const nights = Math.round((outDate - inDate) / (1000 * 60 * 60 * 24));
+        if (nights < 2 || nights > 3) {
+          showToast('숙박은 2박~3박만 가능합니다.', true);
+          return;
+        }
+      }
+
+      const tourChecked = form.querySelectorAll('input[name="tourProgram"]:checked');
+
+      // 필수 필드 확인
+      const requiredFields = form.querySelectorAll('[required]');
+      for (const field of requiredFields) {
+        if (!field.value && field.type !== 'radio') {
+          field.focus();
+          showToast('필수 항목을 모두 입력해 주세요.', true);
+          return;
+        }
+      }
+
+      // 파일 필수 확인
+      if (uploadedFiles.length === 0) {
+        showToast('경북형 워케이션 신청서 파일을 첨부해 주세요.', true);
+        return;
+      }
+
+      // 데이터 수집
+      const participants = collectGuardians();
+
+      // 다중 파일 base64 변환
+      const files = [];
+      for (const f of uploadedFiles) {
+        files.push({ name: f.name, data: await fileToBase64(f) });
+      }
+
+      const formData = {
+        timestamp: new Date().toLocaleString('ko-KR'),
+        privacyConsent: privacyConsent.value,
+        marketingConsent: getRadioValue('marketingConsent'),
+        company: form.company.value,
+        name: form.name.value,
+        gender: getRadioValue('gender'),
+        phone: form.phone.value,
+        totalGuests: form.totalGuests.value,
+        guardianInfo: JSON.stringify(participants),
+        childrenInfo: '',
+        roomType: form.roomType.value,
+        checkIn: form.checkIn.value,
+        checkOut: form.checkOut.value,
+        workationSchedule: form.workationSchedule.value,
+        workHours: form.workHours.value,
+        tourProgram: Array.from(tourChecked).map(c => c.value).join(', '),
+        otherInquiry: form.otherInquiry.value,
+        estimatedPrice: document.getElementById('priceTotal')?.innerText || '',
+        files: files
+      };
+
+      // Google Apps Script 웹앱으로 전송
+      showLoading(true);
+      try {
+        const SCRIPT_URL = getScriptUrl();
+
+        await fetch(SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          body: new URLSearchParams({ payload: JSON.stringify(formData) })
+        });
+
+        showLoading(false);
+        form.reset();
+        stayInfoEl.innerHTML = '';
+        document.getElementById('successModal').classList.add('show');
+
+      } catch (error) {
+        showLoading(false);
+        showToast('전송 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.', true);
+        console.error('Submit error:', error);
+      }
+    });
+
+    function getRadioValue(name) {
+      const checked = form.querySelector(`input[name="${name}"]:checked`);
+      return checked ? checked.value : '';
+    }
+
+    function getScriptUrl() {
+      // ⚠️ 아래 URL을 Google Apps Script 배포 URL로 교체하세요
+      // 설정 방법은 SETUP_GUIDE.md를 참고하세요
+      return 'https://script.google.com/macros/s/AKfycbx8gEl736O_LKsxChdFrakg77-Avsyr110X-PXgNeN4J8KLoX61dTigsjLvq3vuvyoR4Q/exec';
+    }
+
+    // Modal
+    function closeModal() {
+      document.getElementById('successModal').classList.remove('show');
+    }
+
+    // Toast notification
+    function showToast(message, isError = false) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = 'toast' + (isError ? ' error' : '');
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 4000);
+    }
+
+    // Loading
+    function showLoading(show) {
+      const el = document.getElementById('loading');
+      el.classList.toggle('show', show);
+      document.querySelector('.btn-submit').disabled = show;
+    }
+  </script>
+
+</body>
+</html>
