@@ -28,13 +28,8 @@ function doPost(e) {
       throw new Error('No data received');
     }
 
-    // 1. 파일이 있으면 Google Drive에 저장
-    let fileUrl = '';
-    if (data.files && data.files.length > 0) {
-      fileUrl = saveFilesToDrive(data.files, data.name, data.phone);
-      delete data.files;
-    }
-    data.fileUrl = fileUrl;
+    // 1. 파일 URL (Supabase에서 업로드 완료된 URL)
+    data.fileUrl = data.fileUrls || '';
 
     // 2. 스프레드시트에 저장
     saveToSheet(data);
@@ -220,32 +215,77 @@ function sendSlackNotification(data) {
 }
 
 /**
- * 다중 파일을 Google Drive에 저장 (신청자별 폴더 생성)
+ * 다중 파일을 Google Drive에 저장 (REST API 직접 호출로 권한 문제 우회)
  */
 function saveFilesToDrive(files, name, phone) {
   try {
-    // 사업수행자료 폴더
-    const parentFolder = DriveApp.getFolderById('1HDb03ijx2RFXTD8xwY8RSHnI88Od0bKr');
+    // DriveApp 참조로 OAuth 토큰에 drive 스코프 포함시키기
+    DriveApp.getRootFolder();
+    const token = ScriptApp.getOAuthToken();
+    const PARENT_FOLDER_ID = '1HDb03ijx2RFXTD8xwY8RSHnI88Od0bKr';
 
-    // 신청자명_연락처 뒷자리 4개로 폴더 생성
+    // 신청자명_연락처 뒷자리 4개로 폴더명 생성
     const phoneLast4 = (phone || '').replace(/[^0-9]/g, '').slice(-4);
     const folderName = `${name}_${phoneLast4}`;
 
-    // 같은 이름 폴더가 있으면 재사용
-    const existingFolders = parentFolder.getFoldersByName(folderName);
-    const subFolder = existingFolders.hasNext() ? existingFolders.next() : parentFolder.createFolder(folderName);
+    // 기존 폴더 검색
+    const searchUrl = 'https://www.googleapis.com/drive/v3/files?' +
+      'q=' + encodeURIComponent(`'${PARENT_FOLDER_ID}' in parents and name='${folderName}' and mimeType='application/vnd.google-apps.folder' and trashed=false`) +
+      '&supportsAllDrives=true&includeItemsFromAllDrives=true';
+    const searchRes = JSON.parse(UrlFetchApp.fetch(searchUrl, {
+      headers: { 'Authorization': 'Bearer ' + token }
+    }).getContentText());
 
-    // 파일들 저장
-    const urls = [];
-    for (const f of files) {
-      const ext = f.name.split('.').pop();
-      const blob = Utilities.newBlob(Utilities.base64Decode(f.data), getMimeType(ext), f.name);
-      const file = subFolder.createFile(blob);
-      urls.push(file.getUrl());
+    let subFolderId;
+    if (searchRes.files && searchRes.files.length > 0) {
+      subFolderId = searchRes.files[0].id;
+    } else {
+      // 폴더 생성
+      const createRes = JSON.parse(UrlFetchApp.fetch('https://www.googleapis.com/drive/v3/files?supportsAllDrives=true', {
+        method: 'post',
+        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+        payload: JSON.stringify({
+          name: folderName,
+          mimeType: 'application/vnd.google-apps.folder',
+          parents: [PARENT_FOLDER_ID]
+        })
+      }).getContentText());
+      subFolderId = createRes.id;
     }
 
-    // 폴더 URL 반환
-    return subFolder.getUrl();
+    // 파일들 업로드
+    for (const f of files) {
+      const ext = f.name.split('.').pop();
+      const fileBytes = Utilities.base64Decode(f.data);
+      const boundary = 'boundary_' + Utilities.getUuid();
+      const mimeType = getMimeType(ext);
+
+      const metadata = JSON.stringify({
+        name: f.name,
+        parents: [subFolderId]
+      });
+
+      // multipart upload
+      const requestBody = Utilities.newBlob(
+        '--' + boundary + '\r\n' +
+        'Content-Type: application/json; charset=UTF-8\r\n\r\n' +
+        metadata + '\r\n' +
+        '--' + boundary + '\r\n' +
+        'Content-Type: ' + mimeType + '\r\n' +
+        'Content-Transfer-Encoding: base64\r\n\r\n' +
+        f.data + '\r\n' +
+        '--' + boundary + '--'
+      ).getBytes();
+
+      UrlFetchApp.fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&supportsAllDrives=true', {
+        method: 'post',
+        headers: { 'Authorization': 'Bearer ' + token },
+        contentType: 'multipart/related; boundary=' + boundary,
+        payload: requestBody
+      });
+    }
+
+    return 'https://drive.google.com/drive/folders/' + subFolderId;
   } catch(e) {
     Logger.log('File save error: ' + e.toString());
     return 'Error: ' + e.toString();

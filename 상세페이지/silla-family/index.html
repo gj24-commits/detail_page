@@ -645,9 +645,19 @@
     <!-- 5. 경북형 워케이션 신청서 -->
     <div class="form-section">
       <h2>경북형 워케이션 신청서</h2>
-      <div class="notice-box">
-        <p>경북형 워케이션 신청서는 예약 문의 제출 후 <strong>12시간 이내</strong>에<br>
-        <strong>developer@darimaker.com</strong>으로 이메일 제출해 주세요.</p>
+      <p class="section-desc">경북형 워케이션 신청서를 첨부해 주세요</p>
+      <div class="field">
+        <label>신청서 파일 업로드 <span class="required">*</span></label>
+        <div class="file-upload-area" id="fileUploadArea">
+          <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.hwp,.hwpx,.jpg,.jpeg,.png" multiple style="display:none">
+          <div class="file-upload-placeholder" id="filePlaceholder" onclick="document.getElementById('fileInput').click()">
+            <span class="file-icon">📎</span>
+            <span>클릭하여 파일을 선택하세요 (여러 개 가능)</span>
+            <span class="file-types">PDF, DOC, HWP, JPG, PNG (파일당 최대 10MB)</span>
+          </div>
+          <div id="fileList"></div>
+          <button type="button" class="btn-add" id="addMoreFiles" style="display:none" onclick="document.getElementById('fileInput').click()">+ 파일 추가</button>
+        </div>
       </div>
     </div>
 
@@ -978,6 +988,77 @@
     document.querySelector('[name="totalGuests"]')?.addEventListener('input', calculatePrice);
     document.querySelectorAll('input[name="tourProgram"]').forEach(el => el.addEventListener('change', calculatePrice));
 
+    // ===== Supabase 파일 업로드 =====
+    const SUPABASE_URL = 'https://keljydlboramvnbhxytg.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlbGp5ZGxib3JhbXZuYmh4eXRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxODYxMzQsImV4cCI6MjA5MDc2MjEzNH0.3XOihn5vU0EcX21qtk9wEVrnj3rV_cMKP3PTfl0o_Iw';
+    const BUCKET = 'uploads';
+
+    let uploadedFiles = [];
+    const fileInput = document.getElementById('fileInput');
+
+    fileInput.addEventListener('change', () => {
+      for (const file of fileInput.files) {
+        if (file.size > 10 * 1024 * 1024) {
+          showToast(`${file.name}: 10MB 초과`, true);
+          continue;
+        }
+        if (!uploadedFiles.some(f => f.name === file.name && f.size === file.size)) {
+          uploadedFiles.push(file);
+        }
+      }
+      fileInput.value = '';
+      renderFileList();
+    });
+
+    function renderFileList() {
+      const list = document.getElementById('fileList');
+      const placeholder = document.getElementById('filePlaceholder');
+      const addBtn = document.getElementById('addMoreFiles');
+      if (uploadedFiles.length === 0) {
+        list.innerHTML = '';
+        placeholder.style.display = 'flex';
+        addBtn.style.display = 'none';
+        return;
+      }
+      placeholder.style.display = 'none';
+      addBtn.style.display = 'inline-block';
+      list.innerHTML = uploadedFiles.map((f, i) =>
+        `<div class="file-item"><span>${f.name}</span><button type="button" class="btn-remove" onclick="removeFile(${i})">삭제</button></div>`
+      ).join('');
+    }
+
+    function removeFile(index) {
+      uploadedFiles.splice(index, 1);
+      renderFileList();
+    }
+
+    async function uploadFilesToSupabase(name, phone) {
+      const phoneLast4 = (phone || '').replace(/[^0-9]/g, '').slice(-4);
+      const folderPrefix = `${name}_${phoneLast4}`;
+      const urls = [];
+
+      for (const file of uploadedFiles) {
+        const timestamp = Date.now();
+        const rand = Math.random().toString(36).substring(2, 8);
+        const safeName = file.name.replace(/[^a-zA-Z0-9가-힣._-]/g, '_');
+        const filePath = `${folderPrefix}/${timestamp}_${rand}_${safeName}`;
+
+        const res = await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${filePath}`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'apikey': SUPABASE_KEY
+          },
+          body: file
+        });
+
+        if (res.ok) {
+          urls.push(`${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${filePath}`);
+        }
+      }
+      return urls;
+    }
+
     // ===== 폼 제출 =====
     const form = document.getElementById('reservationForm');
 
@@ -1014,6 +1095,21 @@
         }
       }
 
+      // 파일 필수 확인
+      if (uploadedFiles.length === 0) {
+        showToast('경북형 워케이션 신청서 파일을 첨부해 주세요.', true);
+        return;
+      }
+
+      // 파일 Supabase 업로드
+      showLoading(true);
+      const fileUrls = await uploadFilesToSupabase(form.name.value, form.phone.value);
+      if (fileUrls.length === 0) {
+        showLoading(false);
+        showToast('파일 업로드에 실패했습니다. 다시 시도해 주세요.', true);
+        return;
+      }
+
       // 데이터 수집
       const guardians = collectGuardians();
       const children = collectChildren();
@@ -1036,11 +1132,11 @@
         workHours: '',
         tourProgram: Array.from(tourChecked).map(c => c.value).join(', '),
         otherInquiry: form.otherInquiry.value,
-        estimatedPrice: document.getElementById('priceTotal')?.innerText || ''
+        estimatedPrice: document.getElementById('priceTotal')?.innerText || '',
+        fileUrls: fileUrls.join('\n')
       };
 
       // Google Apps Script 웹앱으로 전송
-      showLoading(true);
       try {
         const SCRIPT_URL = getScriptUrl();
 
