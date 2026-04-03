@@ -933,13 +933,19 @@
 
     async function uploadFilesToSupabase(name, phone) {
       const phoneDigits = (phone || '').replace(/[^0-9]/g, '');
-      const folderPrefix = `reservation_${phoneDigits.slice(-4)}_${Date.now()}`;
+      const ts = Date.now();
+      const folderPrefix = `reservation_${phoneDigits.slice(-4)}_${ts}`;
       const urls = [];
 
-      for (const file of uploadedFiles) {
+      alert(`업로드 시작: ${uploadedFiles.length}개 파일, 폴더: ${folderPrefix}`);
+
+      for (let i = 0; i < uploadedFiles.length; i++) {
+        const file = uploadedFiles[i];
         const rand = Math.random().toString(36).substring(2, 8);
         const ext = file.name.split('.').pop().toLowerCase();
         const filePath = `${folderPrefix}/${rand}.${ext}`;
+
+        alert(`파일 ${i+1}: ${file.name} (${file.size}bytes, type: ${file.type})\npath: ${filePath}`);
 
         try {
           const res = await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${filePath}`, {
@@ -953,16 +959,17 @@
           });
 
           const resText = await res.text();
+          alert(`응답 ${i+1}: status=${res.status}, body=${resText}`);
+
           if (res.ok) {
             urls.push(`${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${filePath}`);
-          } else {
-            console.error('Upload failed:', res.status, resText);
-            alert('업로드 실패 상세: ' + res.status + ' ' + resText);
           }
         } catch(err) {
-          console.error('Upload error:', err);
+          alert(`FETCH 에러 ${i+1}: ${err.message}`);
         }
       }
+
+      alert(`업로드 완료: ${urls.length}/${uploadedFiles.length}개 성공`);
       return urls;
     }
 
