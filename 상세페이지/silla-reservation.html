@@ -366,6 +366,18 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
+    /* Notice box */
+    .notice-box {
+      background: #fff8e1;
+      border: 1px solid #ffe082;
+      border-radius: 12px;
+      padding: 20px 24px;
+      text-align: center;
+      line-height: 1.8;
+      font-size: 15px;
+      color: #795548;
+    }
+
     /* Price section */
     .price-breakdown {
       display: flex;
@@ -610,19 +622,9 @@
     <!-- 5. 경북형 워케이션 신청서 -->
     <div class="form-section">
       <h2>경북형 워케이션 신청서</h2>
-      <p class="section-desc">경북형 워케이션 신청서를 첨부해 주세요</p>
-      <div class="field">
-        <label>신청서 파일 업로드 <span class="required">*</span></label>
-        <div class="file-upload-area" id="fileUploadArea">
-          <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.hwp,.hwpx,.jpg,.jpeg,.png" multiple style="display:none">
-          <div class="file-upload-placeholder" id="filePlaceholder" onclick="document.getElementById('fileInput').click()">
-            <span class="file-icon">📎</span>
-            <span>클릭하여 파일을 선택하세요 (여러 개 가능)</span>
-            <span class="file-types">PDF, DOC, HWP, JPG, PNG (파일당 최대 10MB)</span>
-          </div>
-          <div id="fileList"></div>
-          <button type="button" class="btn-add" id="addMoreFiles" style="display:none" onclick="document.getElementById('fileInput').click()">+ 파일 추가</button>
-        </div>
+      <div class="notice-box">
+        <p>경북형 워케이션 신청서는 예약 문의 제출 후 <strong>12시간 이내</strong>에<br>
+        <strong>developer@darimaker.com</strong>으로 이메일 제출해 주세요.</p>
       </div>
     </div>
 
@@ -875,57 +877,6 @@
     document.querySelector('[name="totalGuests"]')?.addEventListener('input', calculatePrice);
     document.querySelectorAll('input[name="tourProgram"]').forEach(el => el.addEventListener('change', calculatePrice));
 
-    // ===== 파일 업로드 (다중) =====
-    let uploadedFiles = [];
-    const fileInput = document.getElementById('fileInput');
-
-    fileInput.addEventListener('change', () => {
-      const newFiles = Array.from(fileInput.files);
-      for (const file of newFiles) {
-        if (file.size > 10 * 1024 * 1024) {
-          showToast(`${file.name}: 10MB 초과. 건너뜁니다.`, true);
-          continue;
-        }
-        if (!uploadedFiles.some(f => f.name === file.name && f.size === file.size)) {
-          uploadedFiles.push(file);
-        }
-      }
-      fileInput.value = '';
-      renderFileList();
-    });
-
-    function renderFileList() {
-      const list = document.getElementById('fileList');
-      const placeholder = document.getElementById('filePlaceholder');
-      const addBtn = document.getElementById('addMoreFiles');
-
-      if (uploadedFiles.length === 0) {
-        list.innerHTML = '';
-        placeholder.style.display = 'flex';
-        addBtn.style.display = 'none';
-        return;
-      }
-      placeholder.style.display = 'none';
-      addBtn.style.display = 'inline-block';
-      list.innerHTML = uploadedFiles.map((f, i) =>
-        `<div class="file-item"><span>${f.name}</span><button type="button" class="btn-remove" onclick="removeFile(${i})">삭제</button></div>`
-      ).join('');
-    }
-
-    function removeFile(index) {
-      uploadedFiles.splice(index, 1);
-      renderFileList();
-    }
-
-    function fileToBase64(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result.split(',')[1]);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-    }
-
     // ===== 폼 제출 =====
     const form = document.getElementById('reservationForm');
 
@@ -962,20 +913,8 @@
         }
       }
 
-      // 파일 필수 확인
-      if (uploadedFiles.length === 0) {
-        showToast('경북형 워케이션 신청서 파일을 첨부해 주세요.', true);
-        return;
-      }
-
       // 데이터 수집
       const participants = collectGuardians();
-
-      // 다중 파일 base64 변환
-      const files = [];
-      for (const f of uploadedFiles) {
-        files.push({ name: f.name, data: await fileToBase64(f) });
-      }
 
       const formData = {
         timestamp: new Date().toLocaleString('ko-KR'),
@@ -995,8 +934,7 @@
         workHours: '',
         tourProgram: Array.from(tourChecked).map(c => c.value).join(', '),
         otherInquiry: form.otherInquiry.value,
-        estimatedPrice: document.getElementById('priceTotal')?.innerText || '',
-        files: files
+        estimatedPrice: document.getElementById('priceTotal')?.innerText || ''
       };
 
       // Google Apps Script 웹앱으로 전송
@@ -1030,7 +968,7 @@
     function getScriptUrl() {
       // ⚠️ 아래 URL을 Google Apps Script 배포 URL로 교체하세요
       // 설정 방법은 SETUP_GUIDE.md를 참고하세요
-      return 'https://script.google.com/macros/s/AKfycbx8gEl736O_LKsxChdFrakg77-Avsyr110X-PXgNeN4J8KLoX61dTigsjLvq3vuvyoR4Q/exec';
+      return 'https://script.google.com/macros/s/AKfycbxzWgHma45ltRNq3i405x9mi0Nw89X5RGp2L2DYZsgrwv5KpZ1NF54US38X_fimk9MU5Q/exec';
     }
 
     // Modal
