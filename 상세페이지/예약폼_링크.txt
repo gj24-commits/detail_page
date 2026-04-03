@@ -1,18 +1,19 @@
-두런두런 워케이션 경주 신라레거시점 - 예약폼 링크 정리
+두런두런 워케이션 - 예약폼 링크 정리
 =======================================================
 
-[패밀리 워케이션] 두런두런 패밀리 워케이션 경주 신라레거시점
+[경주 신라레거시 - 패밀리 워케이션]
 https://gj24-commits.github.io/detail_page/%EC%83%81%EC%84%B8%ED%8E%98%EC%9D%B4%EC%A7%80/silla-family/
 
-[워케이션] 두런두런 워케이션 경주 신라레거시점
+[경주 신라레거시 - 워케이션]
 https://gj24-commits.github.io/detail_page/%EC%83%81%EC%84%B8%ED%8E%98%EC%9D%B4%EC%A7%80/silla/
 
+[국립칠곡숲체원 - 워케이션]
+https://gj24-commits.github.io/detail_page/%EC%83%81%EC%84%B8%ED%8E%98%EC%9D%B4%EC%A7%80/chilgok/
+
 -------------------------------------------------------
-Google Apps Script 웹앱 URL
-https://script.google.com/macros/s/AKfycbxzWgHma45ltRNq3i405x9mi0Nw89X5RGp2L2DYZsgrwv5KpZ1NF54US38X_fimk9MU5Q/exec
-
 응답 데이터 저장 스프레드시트
-https://docs.google.com/spreadsheets/d/1t9NdbI0_WmjQ03JnDY0CKiy5jWplNoUJljCA6JgoOyM/edit
+  경주 신라레거시: https://docs.google.com/spreadsheets/d/1t9NdbI0_WmjQ03JnDY0CKiy5jWplNoUJljCA6JgoOyM/edit
+  국립칠곡숲체원: https://docs.google.com/spreadsheets/d/12RJAZ8CdwR5yJjmbetusxvTxuLxweABbP-CiTzEbctM/edit
 
-경북형 워케이션 신청서 제출 이메일
-developer@darimaker.com (예약 문의 제출 후 12시간 이내)
+신청서 파일 저장소 (Supabase Storage)
+https://supabase.com/dashboard/project/keljydlboramvnbhxytg/storage/buckets/uploads
