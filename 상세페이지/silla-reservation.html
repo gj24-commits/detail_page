@@ -932,27 +932,33 @@
     }
 
     async function uploadFilesToSupabase(name, phone) {
-      const phoneLast4 = (phone || '').replace(/[^0-9]/g, '').slice(-4);
-      const folderPrefix = `${name}_${phoneLast4}`;
+      const phoneDigits = (phone || '').replace(/[^0-9]/g, '');
+      const folderPrefix = `reservation_${phoneDigits.slice(-4)}_${Date.now()}`;
       const urls = [];
 
       for (const file of uploadedFiles) {
-        const timestamp = Date.now();
         const rand = Math.random().toString(36).substring(2, 8);
-        const safeName = file.name.replace(/[^a-zA-Z0-9가-힣._-]/g, '_');
-        const filePath = `${folderPrefix}/${timestamp}_${rand}_${safeName}`;
+        const ext = file.name.split('.').pop().toLowerCase();
+        const filePath = `${folderPrefix}/${rand}.${ext}`;
 
-        const res = await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${filePath}`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${SUPABASE_KEY}`,
-            'apikey': SUPABASE_KEY
-          },
-          body: file
-        });
+        try {
+          const res = await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${filePath}`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${SUPABASE_KEY}`,
+              'apikey': SUPABASE_KEY,
+              'Content-Type': file.type || 'application/octet-stream'
+            },
+            body: file
+          });
 
-        if (res.ok) {
-          urls.push(`${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${filePath}`);
+          if (res.ok) {
+            urls.push(`${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${filePath}`);
+          } else {
+            console.error('Upload failed:', await res.text());
+          }
+        } catch(err) {
+          console.error('Upload error:', err);
         }
       }
       return urls;
