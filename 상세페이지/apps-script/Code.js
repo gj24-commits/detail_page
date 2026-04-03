@@ -7,10 +7,13 @@
  * 설정 방법은 SETUP_GUIDE.md를 참고하세요.
  */
 
-// ⚠️ 아래 값들을 실제 값으로 교체하세요
-const SPREADSHEET_ID = '1t9NdbI0_WmjQ03JnDY0CKiy5jWplNoUJljCA6JgoOyM';  // 두런두런 패밀리 워케이션 경주 신라레거시점 응답폼
-const SHEET_NAME = '예약문의';                    // 시트 이름
-const SLACK_WEBHOOK_URL = 'YOUR_SLACK_WEBHOOK_URL';  // 슬랙 웹훅 URL
+// 상품별 스프레드시트 ID
+const SPREADSHEET_MAP = {
+  'default': '1t9NdbI0_WmjQ03JnDY0CKiy5jWplNoUJljCA6JgoOyM',  // 경주 신라레거시점
+  'chilgok': '12RJAZ8CdwR5yJjmbetusxvTxuLxweABbP-CiTzEbctM',  // 국립칠곡숲체원
+};
+const SHEET_NAME = '예약문의';
+const SLACK_WEBHOOK_URL = 'YOUR_SLACK_WEBHOOK_URL';
 
 /**
  * POST 요청 처리 (폼 데이터 수신)
@@ -58,7 +61,8 @@ function doGet(e) {
  * 스프레드시트에 데이터 저장
  */
 function saveToSheet(data) {
-  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const sheetId = SPREADSHEET_MAP[data.product] || SPREADSHEET_MAP['default'];
+  const ss = SpreadsheetApp.openById(sheetId);
   let sheet = ss.getSheetByName(SHEET_NAME);
 
   // 보호자/자녀 JSON 파싱 → 읽기 좋은 텍스트로 변환
