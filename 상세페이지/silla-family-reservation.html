@@ -1109,7 +1109,14 @@
 
       // 파일 Supabase 업로드
       showLoading(true);
-      const fileUrls = await uploadFilesToSupabase(form.name.value, form.phone.value);
+      let fileUrls;
+      try {
+        fileUrls = await uploadFilesToSupabase(form.name.value, form.phone.value);
+      } catch(uploadErr) {
+        showLoading(false);
+        showToast('파일 업로드 오류: ' + uploadErr.message, true);
+        return;
+      }
       if (fileUrls.length === 0) {
         showLoading(false);
         showToast('파일 업로드에 실패했습니다. 다시 시도해 주세요.', true);

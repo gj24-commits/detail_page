@@ -933,19 +933,13 @@
 
     async function uploadFilesToSupabase(name, phone) {
       const phoneDigits = (phone || '').replace(/[^0-9]/g, '');
-      const ts = Date.now();
-      const folderPrefix = `reservation_${phoneDigits.slice(-4)}_${ts}`;
+      const folderPrefix = `reservation_${phoneDigits.slice(-4)}_${Date.now()}`;
       const urls = [];
 
-      alert(`업로드 시작: ${uploadedFiles.length}개 파일, 폴더: ${folderPrefix}`);
-
-      for (let i = 0; i < uploadedFiles.length; i++) {
-        const file = uploadedFiles[i];
+      for (const file of uploadedFiles) {
         const rand = Math.random().toString(36).substring(2, 8);
         const ext = file.name.split('.').pop().toLowerCase();
         const filePath = `${folderPrefix}/${rand}.${ext}`;
-
-        alert(`파일 ${i+1}: ${file.name} (${file.size}bytes, type: ${file.type})\npath: ${filePath}`);
 
         try {
           const res = await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${filePath}`, {
@@ -958,18 +952,13 @@
             body: file
           });
 
-          const resText = await res.text();
-          alert(`응답 ${i+1}: status=${res.status}, body=${resText}`);
-
           if (res.ok) {
             urls.push(`${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${filePath}`);
           }
         } catch(err) {
-          alert(`FETCH 에러 ${i+1}: ${err.message}`);
+          console.error('Upload error:', err);
         }
       }
-
-      alert(`업로드 완료: ${urls.length}/${uploadedFiles.length}개 성공`);
       return urls;
     }
 
@@ -1022,7 +1011,7 @@
         fileUrls = await uploadFilesToSupabase(form.name.value, form.phone.value);
       } catch(uploadErr) {
         showLoading(false);
-        showToast('파일 업로드 오류: ' + uploadErr.message, true);
+        showToast('파일 업로드 중 오류가 발생했습니다.', true);
         return;
       }
       if (fileUrls.length === 0) {
