@@ -9,11 +9,12 @@
 
 // 상품별 스프레드시트 ID
 const SPREADSHEET_MAP = {
-  'default': '1t9NdbI0_WmjQ03JnDY0CKiy5jWplNoUJljCA6JgoOyM',  // 경주 신라레거시점
-  'chilgok': '12RJAZ8CdwR5yJjmbetusxvTxuLxweABbP-CiTzEbctM',  // 국립칠곡숲체원
+  'silla': '1t9NdbI0_WmjQ03JnDY0CKiy5jWplNoUJljCA6JgoOyM',        // 경주 신라레거시점
+  'silla-family': '1t9NdbI0_WmjQ03JnDY0CKiy5jWplNoUJljCA6JgoOyM',  // 경주 신라레거시점 패밀리
+  'chilgok': '12RJAZ8CdwR5yJjmbetusxvTxuLxweABbP-CiTzEbctM',       // 국립칠곡숲체원
 };
 const SHEET_NAME = '예약문의';
-const SLACK_WEBHOOK_URL = 'YOUR_SLACK_WEBHOOK_URL';
+const SLACK_WEBHOOK_URL = 'https://hooks.slack.com/services/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';
 
 /**
  * POST 요청 처리 (폼 데이터 수신)
@@ -61,7 +62,7 @@ function doGet(e) {
  * 스프레드시트에 데이터 저장
  */
 function saveToSheet(data) {
-  const sheetId = SPREADSHEET_MAP[data.product] || SPREADSHEET_MAP['default'];
+  const sheetId = SPREADSHEET_MAP[data.product] || SPREADSHEET_MAP['silla'];
   const ss = SpreadsheetApp.openById(sheetId);
   let sheet = ss.getSheetByName(SHEET_NAME);
 
@@ -136,83 +137,28 @@ function sendSlackNotification(data) {
     return;
   }
 
-  const nights = calculateNights(data.checkIn, data.checkOut);
-
-  const message = {
-    blocks: [
-      {
-        type: 'header',
-        text: {
-          type: 'plain_text',
-          text: '🏨 새로운 예약 문의가 접수되었습니다!',
-          emoji: true
-        }
-      },
-      {
-        type: 'section',
-        fields: [
-          { type: 'mrkdwn', text: `*기업명:*\n${data.company || '-'}` },
-          { type: 'mrkdwn', text: `*예약자:*\n${data.name || '-'} (${data.gender || '-'})` },
-          { type: 'mrkdwn', text: `*연락처:*\n${data.phone || '-'}` },
-          { type: 'mrkdwn', text: `*총 인원:*\n${data.totalGuests || '-'}명` }
-        ]
-      },
-      {
-        type: 'section',
-        fields: [
-          { type: 'mrkdwn', text: `*객실 타입:*\n${data.roomType || '-'}` },
-          { type: 'mrkdwn', text: `*숙박 일정:*\n${data.checkIn || '-'} ~ ${data.checkOut || '-'} (${nights})` }
-        ]
-      },
-      {
-        type: 'section',
-        text: {
-          type: 'mrkdwn',
-          text: `*관광 프로그램:*\n${data.tourProgram || '-'}`
-        }
-      },
-      {
-        type: 'section',
-        text: {
-          type: 'mrkdwn',
-          text: `*보호자:*\n${formatGuardians(data.guardianInfo)}`
-        }
-      },
-      {
-        type: 'section',
-        text: {
-          type: 'mrkdwn',
-          text: `*자녀 정보:*\n${formatChildren(data.childrenInfo)}`
-        }
-      }
-    ]
+  // 상품명 매핑
+  const productNames = {
+    'silla': '두런두런 워케이션 경주 신라레거시점',
+    'silla-family': '두런두런 패밀리 워케이션 경주 신라레거시점',
+    'chilgok': '두런두런 워케이션 국립칠곡숲체원'
   };
+  const productName = productNames[data.product] || '두런두런 워케이션';
 
-  // 기타 문의가 있으면 추가
-  if (data.otherInquiry) {
-    message.blocks.push({
-      type: 'section',
-      text: {
-        type: 'mrkdwn',
-        text: `*기타 문의:*\n${data.otherInquiry}`
-      }
-    });
-  }
-
-  message.blocks.push({
-    type: 'context',
-    elements: [
-      {
-        type: 'mrkdwn',
-        text: `📅 접수 시각: ${data.timestamp || new Date().toLocaleString('ko-KR')}`
-      }
-    ]
-  });
+  const text = `[${productName}] 예약이 들어왔습니다.\n` +
+    `기업명 : ${data.company || '-'}\n` +
+    `예약자명 : ${data.name || '-'}\n` +
+    `연락처 : ${data.phone || '-'}\n` +
+    `객실 타입 : ${data.roomType || '-'}\n` +
+    `숙박인원 : ${data.totalGuests || '-'}명\n` +
+    `입실일 : ${data.checkIn || '-'}\n` +
+    `퇴실일 : ${data.checkOut || '-'}\n` +
+    `관광프로그램 : ${data.tourProgram || '-'}`;
 
   const options = {
     method: 'post',
     contentType: 'application/json',
-    payload: JSON.stringify(message)
+    payload: JSON.stringify({ text: text })
   };
 
   UrlFetchApp.fetch(SLACK_WEBHOOK_URL, options);
