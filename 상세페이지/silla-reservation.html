@@ -572,7 +572,7 @@
           </div>
         </div>
         <div id="stayInfo"></div>
-        <p class="hint">2026년 4월 13일 ~ 11월 | 2박3일~3박4일 | 금~일 입실 불가 (토요일 퇴실만 가능)</p>
+        <p class="hint">2026년 4월 13일 ~ 11월 | 2박3일~3박4일</p>
       </div>
 
       <div class="field">
@@ -676,22 +676,7 @@
     checkInEl.max = SEASON_END;
     checkOutEl.min = SEASON_START;
 
-    // 입실 불가 요일: 금(5), 토(6), 일(0)
-    function isBlockedCheckIn(dateStr) {
-      const day = new Date(dateStr).getDay();
-      return day === 0 || day === 5 || day === 6;
-    }
-
     checkInEl.addEventListener('change', () => {
-      if (isBlockedCheckIn(checkInEl.value)) {
-        showToast('금/토/일요일은 입실일로 선택할 수 없습니다.', true);
-        checkInEl.value = '';
-        checkOutEl.value = '';
-        checkOutEl.min = '';
-        checkOutEl.max = '';
-        stayInfoEl.innerHTML = '';
-        return;
-      }
       const checkInDate = new Date(checkInEl.value);
       // 퇴실 최소: 입실 + 2일 (2박), 최대: 입실 + 3일 (3박)
       const minOut = new Date(checkInDate);
@@ -718,17 +703,7 @@
       }
     });
 
-    checkOutEl.addEventListener('change', () => {
-      // 퇴실일: 일요일만 불가 (토요일 퇴실은 허용)
-      const day = new Date(checkOutEl.value).getDay();
-      if (day === 0) {
-        showToast('일요일은 퇴실일로 선택할 수 없습니다.', true);
-        checkOutEl.value = '';
-        stayInfoEl.innerHTML = '';
-        return;
-      }
-      updateStayInfo();
-    });
+    checkOutEl.addEventListener('change', updateStayInfo);
 
     function updateStayInfo() {
       if (!checkInEl.value || !checkOutEl.value) {
@@ -1017,7 +992,7 @@
         checkIn: form.checkIn.value,
         checkOut: form.checkOut.value,
         workationSchedule: form.workationSchedule.value,
-        workHours: form.workHours.value,
+        workHours: '',
         tourProgram: Array.from(tourChecked).map(c => c.value).join(', '),
         otherInquiry: form.otherInquiry.value,
         estimatedPrice: document.getElementById('priceTotal')?.innerText || '',

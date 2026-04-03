@@ -1094,7 +1094,7 @@
         checkIn: form.checkIn.value,
         checkOut: form.checkOut.value,
         workationSchedule: form.workationSchedule.value,
-        workHours: form.workHours.value,
+        workHours: '',
         tourProgram: Array.from(tourChecked).map(c => c.value).join(', '),
         otherInquiry: form.otherInquiry.value,
         estimatedPrice: document.getElementById('priceTotal')?.innerText || '',
