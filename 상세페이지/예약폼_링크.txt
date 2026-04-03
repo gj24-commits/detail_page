@@ -1,0 +1,16 @@
+두런두런 워케이션 경주 신라레거시점 - 예약폼 링크 정리
+=======================================================
+
+[패밀리 워케이션] 두런두런 패밀리 워케이션 경주 신라레거시점
+https://drdr-gyeongju-reservation.netlify.app/silla-family-reservation.html
+
+[워케이션] 두런두런 워케이션 경주 신라레거시점
+https://drdr-gyeongju-reservation.netlify.app/silla-reservation.html
+
+-------------------------------------------------------
+응답 데이터 저장 스프레드시트
+https://docs.google.com/spreadsheets/d/1t9NdbI0_WmjQ03JnDY0CKiy5jWplNoUJljCA6JgoOyM/edit
+
+신청서 파일 저장 경로 (Google Drive)
+공유드라이브 > 임원용 드라이브 > 지원사업관련 > 2026년 > 사업화지원금 > 2. 경북형 워케이션 > 사업수행자료
+https://drive.google.com/drive/u/0/folders/1HDb03ijx2RFXTD8xwY8RSHnI88Od0bKr
