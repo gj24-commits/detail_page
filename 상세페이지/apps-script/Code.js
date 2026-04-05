@@ -16,6 +16,14 @@ const SPREADSHEET_MAP = {
 const SHEET_NAME = '예약문의';
 const SLACK_BOT_TOKEN = 'xoxb-4412915678199-10837806412710-6OytkHJSZrJlXniz96REKk4o';
 const SLACK_CHANNEL = '00_상품예약현황';
+const NOTIFY_EMAIL = 'developer@darimaker.com';
+
+// 호텔 담당자 이메일 매핑
+const HOTEL_EMAIL_MAP = {
+  'silla': 'gj24@darimaker.com',
+  'silla-family': 'gj24@darimaker.com',
+  'chilgok': '',  // 추후 설정
+};
 
 /**
  * POST 요청 처리 (폼 데이터 수신)
@@ -45,6 +53,9 @@ function doPost(e) {
     // 4. 이메일 알림 발송
     sendEmailNotification(data);
 
+    // 5. 호텔 담당자에게 예약 확인 메일 발송
+    sendHotelInquiry(data);
+
     return HtmlService.createHtmlOutput('<html><body>OK</body></html>');
 
   } catch (error) {
@@ -54,12 +65,64 @@ function doPost(e) {
 }
 
 /**
- * GET 요청 처리 (테스트용)
+ * GET 요청 처리 (승인/거절 처리 + 테스트)
  */
 function doGet(e) {
+  const action = e && e.parameter && e.parameter.action;
+  const rowNum = e && e.parameter && e.parameter.row;
+  const product = e && e.parameter && e.parameter.product;
+
+  if (action && rowNum && product) {
+    const sheetId = SPREADSHEET_MAP[product] || SPREADSHEET_MAP['silla'];
+    const ss = SpreadsheetApp.openById(sheetId);
+    const sheet = ss.getSheetByName(SHEET_NAME);
+    const row = parseInt(rowNum);
+
+    // 상태 컬럼 (19번째 = S열)
+    const statusCell = sheet.getRange(row, 19);
+
+    if (action === 'approve') {
+      statusCell.setValue('승인');
+      statusCell.setBackground('#c8e6c9');
+
+      // 슬랙에 승인 알림
+      const name = sheet.getRange(row, 5).getValue();
+      const company = sheet.getRange(row, 4).getValue();
+      const productNames = { 'silla': '경주 신라레거시점', 'silla-family': '경주 신라레거시점 패밀리', 'chilgok': '국립칠곡숲체원' };
+      const prodName = productNames[product] || product;
+      sendSlackMessage(`✅ [${prodName}] ${company} ${name}님 예약이 승인되었습니다.`);
+
+      return HtmlService.createHtmlOutput('<html><body style="font-family:sans-serif;text-align:center;padding:60px;"><h1 style="color:#1a5c3a;">✅ 예약 승인 완료</h1><p>해당 예약이 승인 처리되었습니다.</p></body></html>');
+
+    } else if (action === 'reject') {
+      statusCell.setValue('거절');
+      statusCell.setBackground('#ffcdd2');
+
+      const name = sheet.getRange(row, 5).getValue();
+      const company = sheet.getRange(row, 4).getValue();
+      const productNames = { 'silla': '경주 신라레거시점', 'silla-family': '경주 신라레거시점 패밀리', 'chilgok': '국립칠곡숲체원' };
+      const prodName = productNames[product] || product;
+      sendSlackMessage(`❌ [${prodName}] ${company} ${name}님 예약이 거절되었습니다.`);
+
+      return HtmlService.createHtmlOutput('<html><body style="font-family:sans-serif;text-align:center;padding:60px;"><h1 style="color:#e53935;">❌ 예약 거절 처리</h1><p>해당 예약이 거절 처리되었습니다.</p></body></html>');
+    }
+  }
+
   return ContentService
     .createTextOutput(JSON.stringify({ status: 'ok', message: '예약 문의 API가 정상 작동 중입니다.' }))
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+/**
+ * 슬랙 메시지 전송 (간단 버전)
+ */
+function sendSlackMessage(text) {
+  UrlFetchApp.fetch('https://slack.com/api/chat.postMessage', {
+    method: 'post',
+    headers: { 'Authorization': 'Bearer ' + SLACK_BOT_TOKEN },
+    contentType: 'application/json',
+    payload: JSON.stringify({ channel: SLACK_CHANNEL, text: text })
+  });
 }
 
 /**
@@ -95,11 +158,12 @@ function saveToSheet(data) {
       '업무필수시간',
       '관광프로그램',
       '기타문의',
-      '신청서파일'
+      '신청서파일',
+      '예약상태'
     ]);
 
     // 헤더 스타일링
-    const headerRange = sheet.getRange(1, 1, 1, 18);
+    const headerRange = sheet.getRange(1, 1, 1, 19);
     headerRange.setBackground('#1a5c3a');
     headerRange.setFontColor('#ffffff');
     headerRange.setFontWeight('bold');
@@ -125,11 +189,12 @@ function saveToSheet(data) {
     data.workHours || '',
     data.tourProgram || '',
     data.otherInquiry || '',
-    data.fileUrl || ''
+    data.fileUrl || '',
+    '대기'
   ]);
 
   // 열 너비 자동 조절
-  sheet.autoResizeColumns(1, 18);
+  sheet.autoResizeColumns(1, 19);
 }
 
 /**
@@ -202,6 +267,69 @@ function sendEmailNotification(data) {
     MailApp.sendEmail('developer@darimaker.com', subject, body);
   } catch(e) {
     Logger.log('Email error: ' + e.toString());
+  }
+}
+
+/**
+ * 호텔 담당자에게 예약 확인 메일 발송 (승인/거절 버튼 포함)
+ */
+function sendHotelInquiry(data) {
+  try {
+    const hotelEmail = HOTEL_EMAIL_MAP[data.product];
+    if (!hotelEmail) return;
+
+    const productNames = {
+      'silla': '두런두런 워케이션 경주 신라레거시점',
+      'silla-family': '두런두런 패밀리 워케이션 경주 신라레거시점',
+      'chilgok': '두런두런 워케이션 국립칠곡숲체원'
+    };
+    const productName = productNames[data.product] || '두런두런 워케이션';
+
+    // 현재 행 번호 찾기
+    const sheetId = SPREADSHEET_MAP[data.product] || SPREADSHEET_MAP['silla'];
+    const ss = SpreadsheetApp.openById(sheetId);
+    const sheet = ss.getSheetByName(SHEET_NAME);
+    const lastRow = sheet.getLastRow();
+
+    // 승인/거절 URL 생성
+    const scriptUrl = ScriptApp.getService().getUrl();
+    const approveUrl = `${scriptUrl}?action=approve&row=${lastRow}&product=${data.product}`;
+    const rejectUrl = `${scriptUrl}?action=reject&row=${lastRow}&product=${data.product}`;
+
+    const subject = `[예약확인요청] ${productName} - ${data.company || ''} ${data.name || ''}`;
+
+    const htmlBody = `
+      <div style="font-family:'Apple SD Gothic Neo',sans-serif;max-width:600px;margin:0 auto;">
+        <div style="background:#1a5c3a;color:#fff;padding:24px;border-radius:12px 12px 0 0;">
+          <h2 style="margin:0;">${productName}</h2>
+          <p style="margin:8px 0 0;opacity:0.9;">예약 가능 여부를 확인해 주세요</p>
+        </div>
+        <div style="background:#fff;padding:24px;border:1px solid #e0e0e0;">
+          <table style="width:100%;border-collapse:collapse;font-size:15px;">
+            <tr><td style="padding:10px;color:#888;width:120px;">기업명</td><td style="padding:10px;font-weight:500;">${data.company || '-'}</td></tr>
+            <tr style="background:#f9f9f9;"><td style="padding:10px;color:#888;">예약자명</td><td style="padding:10px;font-weight:500;">${data.name || '-'}</td></tr>
+            <tr><td style="padding:10px;color:#888;">연락처</td><td style="padding:10px;">${data.phone || '-'}</td></tr>
+            <tr style="background:#f9f9f9;"><td style="padding:10px;color:#888;">숙박인원</td><td style="padding:10px;">${data.totalGuests || '-'}명</td></tr>
+            <tr><td style="padding:10px;color:#888;">객실 타입</td><td style="padding:10px;font-weight:600;color:#1a5c3a;">${data.roomType || '-'}</td></tr>
+            <tr style="background:#f9f9f9;"><td style="padding:10px;color:#888;">입실일</td><td style="padding:10px;font-weight:600;">${data.checkIn || '-'}</td></tr>
+            <tr><td style="padding:10px;color:#888;">퇴실일</td><td style="padding:10px;font-weight:600;">${data.checkOut || '-'}</td></tr>
+          </table>
+        </div>
+        <div style="text-align:center;padding:30px;background:#f5f5f5;border-radius:0 0 12px 12px;">
+          <p style="margin:0 0 20px;color:#666;font-size:14px;">해당 일정에 객실 예약이 가능한가요?</p>
+          <a href="${approveUrl}" style="display:inline-block;background:#1a5c3a;color:#fff;padding:14px 40px;border-radius:8px;text-decoration:none;font-size:16px;font-weight:600;margin:0 8px;">✅ 승인</a>
+          <a href="${rejectUrl}" style="display:inline-block;background:#e53935;color:#fff;padding:14px 40px;border-radius:8px;text-decoration:none;font-size:16px;font-weight:600;margin:0 8px;">❌ 거절</a>
+        </div>
+      </div>`;
+
+    MailApp.sendEmail({
+      to: hotelEmail,
+      subject: subject,
+      htmlBody: htmlBody
+    });
+
+  } catch(e) {
+    Logger.log('Hotel inquiry error: ' + e.toString());
   }
 }
 
