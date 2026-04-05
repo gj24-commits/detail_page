@@ -473,6 +473,7 @@ function calculateNights(checkIn, checkOut) {
  */
 function testSetup() {
   const testData = {
+    product: 'silla',
     timestamp: new Date().toLocaleString('ko-KR'),
     privacyConsent: '네',
     marketingConsent: '네',
@@ -480,23 +481,33 @@ function testSetup() {
     name: '홍길동',
     gender: '남',
     phone: '010-1234-5678',
-    totalGuests: '4',
-    guardianInfo: '홍길동(남/35세), 홍길순(여/33세)',
-    childrenInfo: '홍아들(남/7세), 홍딸(여/4세)',
-    roomType: '패밀리 노블 스위트',
-    checkIn: '2026-05-01',
-    checkOut: '2026-05-03',
-    workationSchedule: '5/1~5/2 09:00-18:00',
-    workHours: '10:00-12:00',
-    tourProgram: '정글미디어파크, 경주 버드파크',
-    otherInquiry: '테스트 문의입니다.'
+    totalGuests: '2',
+    guardianInfo: '[]',
+    childrenInfo: '',
+    roomType: '수페리어 스위트 (침대)',
+    checkIn: '2026-05-10',
+    checkOut: '2026-05-12',
+    workationSchedule: '테스트',
+    workHours: '',
+    tourProgram: '',
+    otherInquiry: '',
+    estimatedPrice: '220,000원',
+    fileUrl: ''
   };
 
-  Logger.log('📝 스프레드시트 저장 테스트...');
+  Logger.log('스프레드시트 저장 테스트...');
   saveToSheet(testData);
-  Logger.log('✅ 스프레드시트 저장 성공!');
+  Logger.log('스프레드시트 저장 성공!');
 
-  Logger.log('📢 슬랙 알림 테스트...');
+  Logger.log('슬랙 알림 테스트...');
   sendSlackNotification(testData);
-  Logger.log('✅ 슬랙 알림 전송 성공!');
+  Logger.log('슬랙 알림 전송 성공!');
+
+  Logger.log('내부 이메일 알림 테스트...');
+  sendEmailNotification(testData);
+  Logger.log('내부 이메일 전송 성공!');
+
+  Logger.log('호텔 문의 메일 테스트...');
+  sendHotelInquiry(testData);
+  Logger.log('호텔 문의 메일 전송 성공!');
 }
