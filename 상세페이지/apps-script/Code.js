@@ -14,7 +14,8 @@ const SPREADSHEET_MAP = {
   'chilgok': '12RJAZ8CdwR5yJjmbetusxvTxuLxweABbP-CiTzEbctM',       // 국립칠곡숲체원
 };
 const SHEET_NAME = '예약문의';
-const SLACK_WEBHOOK_URL = 'https://hooks.slack.com/services/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';
+const SLACK_BOT_TOKEN = 'xoxb-4412915678199-10837806412710-6OytkHJSZrJlXniz96REKk4o';
+const SLACK_CHANNEL = '00_상품예약현황';
 
 /**
  * POST 요청 처리 (폼 데이터 수신)
@@ -132,8 +133,8 @@ function saveToSheet(data) {
  * 슬랙 알림 발송
  */
 function sendSlackNotification(data) {
-  if (!SLACK_WEBHOOK_URL || SLACK_WEBHOOK_URL === 'YOUR_SLACK_WEBHOOK_URL') {
-    Logger.log('슬랙 웹훅 URL이 설정되지 않았습니다.');
+  if (!SLACK_BOT_TOKEN) {
+    Logger.log('슬랙 Bot Token이 설정되지 않았습니다.');
     return;
   }
 
@@ -157,11 +158,12 @@ function sendSlackNotification(data) {
 
   const options = {
     method: 'post',
+    headers: { 'Authorization': 'Bearer ' + SLACK_BOT_TOKEN },
     contentType: 'application/json',
-    payload: JSON.stringify({ text: text })
+    payload: JSON.stringify({ channel: SLACK_CHANNEL, text: text })
   };
 
-  UrlFetchApp.fetch(SLACK_WEBHOOK_URL, options);
+  UrlFetchApp.fetch('https://slack.com/api/chat.postMessage', options);
 }
 
 /**
