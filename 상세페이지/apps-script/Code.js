@@ -42,6 +42,9 @@ function doPost(e) {
     // 3. 슬랙 알림 발송
     sendSlackNotification(data);
 
+    // 4. 이메일 알림 발송
+    sendEmailNotification(data);
+
     return HtmlService.createHtmlOutput('<html><body>OK</body></html>');
 
   } catch (error) {
@@ -164,6 +167,42 @@ function sendSlackNotification(data) {
   };
 
   UrlFetchApp.fetch('https://slack.com/api/chat.postMessage', options);
+}
+
+/**
+ * 이메일 알림 발송
+ */
+function sendEmailNotification(data) {
+  try {
+    const productNames = {
+      'silla': '두런두런 워케이션 경주 신라레거시점',
+      'silla-family': '두런두런 패밀리 워케이션 경주 신라레거시점',
+      'chilgok': '두런두런 워케이션 국립칠곡숲체원'
+    };
+    const productName = productNames[data.product] || '두런두런 워케이션';
+
+    const subject = `[예약접수] ${productName} - ${data.company || ''} ${data.name || ''}`;
+
+    const body = `[${productName}] 예약이 들어왔습니다.\n\n` +
+      `기업명 : ${data.company || '-'}\n` +
+      `예약자명 : ${data.name || '-'}\n` +
+      `연락처 : ${data.phone || '-'}\n` +
+      `성별 : ${data.gender || '-'}\n` +
+      `숙박인원 : ${data.totalGuests || '-'}명\n` +
+      `객실 타입 : ${data.roomType || '-'}\n` +
+      `입실일 : ${data.checkIn || '-'}\n` +
+      `퇴실일 : ${data.checkOut || '-'}\n` +
+      `관광프로그램 : ${data.tourProgram || '-'}\n` +
+      `워케이션센터 일정 : ${data.workationSchedule || '-'}\n` +
+      `기타 문의 : ${data.otherInquiry || '-'}\n` +
+      `예상 가격 : ${data.estimatedPrice || '-'}\n` +
+      `신청서 파일 : ${data.fileUrl || '-'}\n` +
+      `\n접수 시각 : ${data.timestamp || new Date().toLocaleString('ko-KR')}`;
+
+    MailApp.sendEmail('developer@darimaker.com', subject, body);
+  } catch(e) {
+    Logger.log('Email error: ' + e.toString());
+  }
 }
 
 /**
