@@ -14,7 +14,7 @@ const SPREADSHEET_MAP = {
   'chilgok': '12RJAZ8CdwR5yJjmbetusxvTxuLxweABbP-CiTzEbctM',       // 국립칠곡숲체원
 };
 const SHEET_NAME = '예약문의';
-const SLACK_WEBHOOK_URL = 'https://hooks.slack.com/services/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';
+const SLACK_WEBHOOK_URL = 'https://hooks.slack.com/services/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';
 
 /**
  * POST 요청 처리 (폼 데이터 수신)
