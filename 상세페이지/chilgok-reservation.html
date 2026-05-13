@@ -773,14 +773,15 @@
     }
 
     // ===== 가격 계산 =====
-    // 칠곡숲체원: 비수기 4단계 (주중=월~목 / 금 / 토 / 일)
-    // 성수기/공휴일/공휴일전일: 일~목은 금요일 가격으로 상향 (금/토는 그대로)
+    // 칠곡숲체원: 경상북도 공식 '경북형 워케이션 개인형 판매가' 기준
+    // 비수기 4구분: [월~목, 금, 토, 일]
+    // 성수기 2구분: [월~금, 토~일]
     const ROOM_PRICES = {
-      '단독형 3인 (기준3/최대4)':    { weekday: 31000,  fri: 90000,  sat: 112000, sun: 53000  },
-      '단독형 5인 (기준5/최대5)':    { weekday: 76000,  fri: 141000, sat: 98000,  sun: 163000 },
-      '단독형 7인 (기준7/최대7)':    { weekday: 122000, fri: 205000, sat: 227000, sun: 144000 },
-      '단체형 9인 (기준9/최대10)':   { weekday: 104000, fri: 204000, sat: 293000, sun: 315000 },
-      '단체형 14인 (기준14/최대15)': { weekday: 322000, fri: 460000, sat: 477000, sun: 344000 }
+      '단독형 3인 (기준3/최대4)':    { off: [9000,   65000,  85000,  29000],  peak: [65000,  85000]  },
+      '단독형 5인 (기준5/최대5)':    { off: [34000,  99000,  119000, 54000],  peak: [99000,  119000] },
+      '단독형 7인 (기준7/최대7)':    { off: [63000,  147000, 167000, 83000],  peak: [147000, 167000] },
+      '단체형 9인 (기준9/최대10)':   { off: [124000, 218000, 238000, 144000], peak: [218000, 238000] },
+      '단체형 14인 (기준14/최대15)': { off: [195000, 333000, 353000, 215000], peak: [333000, 353000] }
     };
 
     // 성수기 기간: 7/15 ~ 8/24
@@ -824,26 +825,31 @@
       return isPeakSeason(dateStr) || HOLIDAYS.includes(dateStr) || HOLIDAY_EVES.includes(dateStr);
     }
 
+    // 비수기 요일 인덱스: [월~목=0, 금=1, 토=2, 일=3]
+    function getOffDayIndex(dateStr) {
+      const dow = new Date(dateStr).getDay(); // 0=일 ... 6=토
+      if (dow === 5) return 1; // 금
+      if (dow === 6) return 2; // 토
+      if (dow === 0) return 3; // 일
+      return 0; // 월~목
+    }
+
+    // 성수기 요일 인덱스: [월~금=0, 토~일=1]
+    function getPeakDayIndex(dateStr) {
+      const dow = new Date(dateStr).getDay();
+      return (dow === 0 || dow === 6) ? 1 : 0;
+    }
+
     function getNightPriceInfo(dateStr, prices) {
-      const d = new Date(dateStr);
-      const dow = d.getDay(); // 0=일, 5=금, 6=토
-      const premium = isPremiumDate(dateStr);
-
-      // 금/토는 항상 해당 요일 가격
-      if (dow === 5) return { price: prices.fri, label: premium ? '금(성수기)' : '금' };
-      if (dow === 6) return { price: prices.sat, label: premium ? '토(성수기)' : '토' };
-
-      // 일~목 + 성수기/공휴일/전일 → 금요일 가격으로 상향
-      if (premium) {
+      if (isPremiumDate(dateStr)) {
         const why = isPeakSeason(dateStr) ? '성수기'
                   : HOLIDAYS.includes(dateStr) ? '공휴일'
                   : '공휴일 전일';
-        return { price: prices.fri, label: why };
+        const idx = getPeakDayIndex(dateStr);
+        return { price: prices.peak[idx], label: why };
       }
-
-      // 비수기 일 / 월~목
-      if (dow === 0) return { price: prices.sun, label: '일' };
-      return { price: prices.weekday, label: '주중' };
+      const idx = getOffDayIndex(dateStr);
+      return { price: prices.off[idx], label: '비수기' };
     }
 
     function calculatePrice() {
