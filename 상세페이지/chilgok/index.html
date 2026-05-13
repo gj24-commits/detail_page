@@ -773,41 +773,77 @@
     }
 
     // ===== 가격 계산 =====
-    // 칠곡숲체원: 주중(월~목) / 주말(금,토)+성수기
+    // 칠곡숲체원: 비수기 4단계 (주중=월~목 / 금 / 토 / 일)
+    // 성수기/공휴일/공휴일전일: 일~목은 금요일 가격으로 상향 (금/토는 그대로)
     const ROOM_PRICES = {
-      '단독형 3인 (기준3/최대4)':    { off: [10000], peak: [78000] },
-      '단독형 5인 (기준5/최대5)':    { off: [27000], peak: [106000] },
-      '단독형 7인 (기준7/최대7)':    { off: [50000], peak: [145000] },
-      '단체형 9인 (기준9/최대10)':   { off: [104000], peak: [206000] },
-      '단체형 14인 (기준14/최대15)': { off: [163000], peak: [309000] }
+      '단독형 3인 (기준3/최대4)':    { weekday: 31000,  fri: 90000,  sat: 112000, sun: 53000  },
+      '단독형 5인 (기준5/최대5)':    { weekday: 76000,  fri: 141000, sat: 98000,  sun: 163000 },
+      '단독형 7인 (기준7/최대7)':    { weekday: 122000, fri: 205000, sat: 227000, sun: 144000 },
+      '단체형 9인 (기준9/최대10)':   { weekday: 104000, fri: 204000, sat: 293000, sun: 315000 },
+      '단체형 14인 (기준14/최대15)': { weekday: 322000, fri: 460000, sat: 477000, sun: 344000 }
     };
 
-    // 성수기: 7/15~8/24, 주말(금토), 공휴일 전일
-    // 2026년 공휴일 전일 목록 (예약 가능 기간 내)
+    // 성수기 기간: 7/15 ~ 8/24
+    // 2026년 공휴일 (예약 가능 기간 4/13~11/30 내)
+    const HOLIDAYS = [
+      '2026-05-05', // 어린이날
+      '2026-05-24', // 부처님오신날
+      '2026-05-25', // 부처님오신날 대체휴일
+      '2026-06-06', // 현충일
+      '2026-08-15', // 광복절
+      '2026-08-17', // 광복절 대체휴일
+      '2026-09-24', // 추석 연휴
+      '2026-09-25', // 추석
+      '2026-09-26', // 추석 연휴
+      '2026-10-03', // 개천절
+      '2026-10-05', // 개천절 대체휴일
+      '2026-10-09', // 한글날
+    ];
+    // 공휴일 전일
     const HOLIDAY_EVES = [
       '2026-05-04', // 어린이날 전일
-      '2026-05-24', // 부처님오신날 전일
+      '2026-05-23', // 부처님오신날 전일
       '2026-06-05', // 현충일 전일
       '2026-08-14', // 광복절 전일
-      '2026-09-22', // 추석 전일
+      '2026-09-23', // 추석 연휴 전일
       '2026-10-02', // 개천절 전일
       '2026-10-08', // 한글날 전일
     ];
 
-    function isPeakNight(dateStr) {
+    function isPeakSeason(dateStr) {
       const d = new Date(dateStr);
       const month = d.getMonth() + 1;
       const day = d.getDate();
-      const dow = d.getDay(); // 0=일,...5=금,6=토
-
-      // 7/15 ~ 8/24 성수기
-      if ((month === 7 && day >= 15) || (month === 8 && day <= 24)) return true;
-      // 주말 (금, 토)
-      if (dow === 5 || dow === 6) return true;
-      // 공휴일 전일
-      if (HOLIDAY_EVES.includes(dateStr)) return true;
-
+      // 7/15 ~ 8/24
+      if (month === 7 && day >= 15) return true;
+      if (month === 8 && day <= 24) return true;
       return false;
+    }
+
+    function isPremiumDate(dateStr) {
+      return isPeakSeason(dateStr) || HOLIDAYS.includes(dateStr) || HOLIDAY_EVES.includes(dateStr);
+    }
+
+    function getNightPriceInfo(dateStr, prices) {
+      const d = new Date(dateStr);
+      const dow = d.getDay(); // 0=일, 5=금, 6=토
+      const premium = isPremiumDate(dateStr);
+
+      // 금/토는 항상 해당 요일 가격
+      if (dow === 5) return { price: prices.fri, label: premium ? '금(성수기)' : '금' };
+      if (dow === 6) return { price: prices.sat, label: premium ? '토(성수기)' : '토' };
+
+      // 일~목 + 성수기/공휴일/전일 → 금요일 가격으로 상향
+      if (premium) {
+        const why = isPeakSeason(dateStr) ? '성수기'
+                  : HOLIDAYS.includes(dateStr) ? '공휴일'
+                  : '공휴일 전일';
+        return { price: prices.fri, label: why };
+      }
+
+      // 비수기 일 / 월~목
+      if (dow === 0) return { price: prices.sun, label: '일' };
+      return { price: prices.weekday, label: '주중' };
     }
 
     function calculatePrice() {
@@ -835,17 +871,19 @@
       for (let i = 0; i < nights; i++) {
         const nightDate = new Date(inDate);
         nightDate.setDate(nightDate.getDate() + i);
-        const dateStr = nightDate.toISOString().split('T')[0];
+        const yyyy = nightDate.getFullYear();
+        const mmStr = String(nightDate.getMonth() + 1).padStart(2, '0');
+        const ddStr = String(nightDate.getDate()).padStart(2, '0');
+        const dateStr = `${yyyy}-${mmStr}-${ddStr}`;
         const dayNames = ['일','월','화','수','목','금','토'];
         const dayName = dayNames[nightDate.getDay()];
-        const peak = isPeakNight(dateStr);
-        const nightPrice = peak ? prices.peak[0] : prices.off[0];
-        roomTotal += nightPrice;
 
-        const seasonLabel = peak ? '성수기/주말' : '주중';
+        const info = getNightPriceInfo(dateStr, prices);
+        roomTotal += info.price;
+
         const mm = nightDate.getMonth() + 1;
         const dd = nightDate.getDate();
-        rows += `<div class="price-row sub"><span>${i+1}박 (${mm}/${dd} ${dayName} · ${seasonLabel})</span><span>${nightPrice.toLocaleString()}원</span></div>`;
+        rows += `<div class="price-row sub"><span>${i+1}박 (${mm}/${dd} ${dayName} · ${info.label})</span><span>${info.price.toLocaleString()}원</span></div>`;
       }
 
       let html = `<div class="price-row" style="font-weight:600;color:#333;margin-bottom:4px;"><span>객실: ${roomType}</span></div>`;
