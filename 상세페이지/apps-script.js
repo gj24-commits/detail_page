@@ -12,6 +12,8 @@ const SPREADSHEET_MAP = {
   'silla': '1t9NdbI0_WmjQ03JnDY0CKiy5jWplNoUJljCA6JgoOyM',        // 경주 신라레거시점
   'silla-family': '1t9NdbI0_WmjQ03JnDY0CKiy5jWplNoUJljCA6JgoOyM',  // 경주 신라레거시점 패밀리
   'chilgok': '12RJAZ8CdwR5yJjmbetusxvTxuLxweABbP-CiTzEbctM',       // 국립칠곡숲체원
+  // TODO: 안동 스프레드시트 생성 후 ID 교체
+  'andong': '1CD8ybVKG2P5uZrE4_nbHwzzPzn2p8bkd1ERlbu08lqY',                            // 안동 스탠포드호텔 워케이션
 };
 const SHEET_NAME = '예약문의';
 const SLACK_BOT_TOKEN = 'xoxb-4412915678199-10837806412710-6OytkHJSZrJlXniz96REKk4o';
@@ -23,6 +25,7 @@ const HOTEL_EMAIL_MAP = {
   'silla': 'gj24@darimaker.com',
   'silla-family': 'gj24@darimaker.com',
   'chilgok': '',  // 추후 설정
+  'andong': 'gj24@darimaker.com',  // 테스트용 — 추후 호텔 담당자 이메일로 교체
 };
 
 /**
@@ -88,7 +91,7 @@ function doGet(e) {
       // 슬랙에 승인 알림
       const name = sheet.getRange(row, 5).getValue();
       const company = sheet.getRange(row, 4).getValue();
-      const productNames = { 'silla': '경주 신라레거시점', 'silla-family': '경주 신라레거시점 패밀리', 'chilgok': '국립칠곡숲체원' };
+      const productNames = { 'silla': '경주 신라레거시점', 'silla-family': '경주 신라레거시점 패밀리', 'chilgok': '국립칠곡숲체원', 'andong': '안동 스탠포드호텔 워케이션' };
       const prodName = productNames[product] || product;
       sendSlackMessage(`✅ [${prodName}] ${company} ${name}님 예약이 승인되었습니다.`);
 
@@ -100,7 +103,7 @@ function doGet(e) {
 
       const name = sheet.getRange(row, 5).getValue();
       const company = sheet.getRange(row, 4).getValue();
-      const productNames = { 'silla': '경주 신라레거시점', 'silla-family': '경주 신라레거시점 패밀리', 'chilgok': '국립칠곡숲체원' };
+      const productNames = { 'silla': '경주 신라레거시점', 'silla-family': '경주 신라레거시점 패밀리', 'chilgok': '국립칠곡숲체원', 'andong': '안동 스탠포드호텔 워케이션' };
       const prodName = productNames[product] || product;
       sendSlackMessage(`❌ [${prodName}] ${company} ${name}님 예약이 거절되었습니다.`);
 
@@ -136,6 +139,12 @@ function saveToSheet(data) {
   // 보호자/자녀 JSON 파싱 → 읽기 좋은 텍스트로 변환
   const guardianText = formatGuardians(data.guardianInfo);
   const childText = formatChildren(data.childrenInfo);
+
+  // 안동은 별도 컬럼(조식/사우나/관광 어른·청소년·어린이) 사용
+  if (data.product === 'andong') {
+    saveAndongRow(ss, sheet, data, guardianText, childText);
+    return;
+  }
 
   // 시트가 없으면 생성 + 헤더 추가
   if (!sheet) {
@@ -198,6 +207,81 @@ function saveToSheet(data) {
 }
 
 /**
+ * 안동 전용 시트 저장 (조식/사우나/관광 어른·청소년·어린이 컬럼 포함)
+ */
+function saveAndongRow(ss, sheet, data, guardianText, childText) {
+  const headers = [
+    '접수일시',
+    '개인정보동의',
+    '마케팅동의',
+    '기업명',
+    '예약자명',
+    '성별',
+    '연락처',
+    '총인원',
+    '보호자정보',
+    '자녀정보',
+    '객실타입',
+    '입실일',
+    '퇴실일',
+    '워케이션센터일정',
+    '업무필수시간',
+    '관광프로그램',
+    '관광-어른',
+    '관광-청소년',
+    '관광-어린이',
+    '조식-어른',
+    '조식-어린이',
+    '사우나-어른',
+    '사우나-어린이',
+    '기타문의',
+    '신청서파일',
+    '예약상태'
+  ];
+
+  if (!sheet) {
+    sheet = ss.insertSheet(SHEET_NAME);
+    sheet.appendRow(headers);
+    const headerRange = sheet.getRange(1, 1, 1, headers.length);
+    headerRange.setBackground('#1a5c3a');
+    headerRange.setFontColor('#ffffff');
+    headerRange.setFontWeight('bold');
+    sheet.setFrozenRows(1);
+  }
+
+  sheet.appendRow([
+    data.timestamp || new Date().toLocaleString('ko-KR'),
+    data.privacyConsent || '',
+    data.marketingConsent || '',
+    data.company || '',
+    data.name || '',
+    data.gender || '',
+    data.phone || '',
+    data.totalGuests || '',
+    guardianText,
+    childText,
+    data.roomType || '',
+    data.checkIn || '',
+    data.checkOut || '',
+    data.workationSchedule || '',
+    data.workHours || '',
+    data.tourProgram || '',
+    data.tour_adult || '',
+    data.tour_teen || '',
+    data.tour_child || '',
+    data.breakfast_adult || '',
+    data.breakfast_child || '',
+    data.sauna_adult || '',
+    data.sauna_child || '',
+    data.otherInquiry || '',
+    data.fileUrl || '',
+    '대기'
+  ]);
+
+  sheet.autoResizeColumns(1, headers.length);
+}
+
+/**
  * 슬랙 알림 발송
  */
 function sendSlackNotification(data) {
@@ -210,11 +294,12 @@ function sendSlackNotification(data) {
   const productNames = {
     'silla': '두런두런 워케이션 경주 신라레거시점',
     'silla-family': '두런두런 패밀리 워케이션 경주 신라레거시점',
-    'chilgok': '두런두런 워케이션 국립칠곡숲체원'
+    'chilgok': '두런두런 워케이션 국립칠곡숲체원',
+    'andong': '두런두런 워케이션 안동 스탠포드호텔'
   };
   const productName = productNames[data.product] || '두런두런 워케이션';
 
-  const text = `[${productName}] 예약이 들어왔습니다.\n` +
+  let text = `[${productName}] 예약이 들어왔습니다.\n` +
     `기업명 : ${data.company || '-'}\n` +
     `예약자명 : ${data.name || '-'}\n` +
     `연락처 : ${data.phone || '-'}\n` +
@@ -223,6 +308,12 @@ function sendSlackNotification(data) {
     `입실일 : ${data.checkIn || '-'}\n` +
     `퇴실일 : ${data.checkOut || '-'}\n` +
     `관광프로그램 : ${data.tourProgram || '-'}`;
+
+  if (data.product === 'andong') {
+    text += `\n관광인원 : 어른 ${data.tour_adult || 0} / 청소년 ${data.tour_teen || 0} / 어린이 ${data.tour_child || 0}` +
+      `\n조식 : 어른 ${data.breakfast_adult || 0} / 어린이 ${data.breakfast_child || 0}` +
+      `\n사우나 : 어른 ${data.sauna_adult || 0} / 어린이 ${data.sauna_child || 0}`;
+  }
 
   const options = {
     method: 'post',
@@ -242,13 +333,14 @@ function sendEmailNotification(data) {
     const productNames = {
       'silla': '두런두런 워케이션 경주 신라레거시점',
       'silla-family': '두런두런 패밀리 워케이션 경주 신라레거시점',
-      'chilgok': '두런두런 워케이션 국립칠곡숲체원'
+      'chilgok': '두런두런 워케이션 국립칠곡숲체원',
+      'andong': '두런두런 워케이션 안동 스탠포드호텔'
     };
     const productName = productNames[data.product] || '두런두런 워케이션';
 
     const subject = `[예약접수] ${productName} - ${data.company || ''} ${data.name || ''}`;
 
-    const body = `[${productName}] 예약이 들어왔습니다.\n\n` +
+    let body = `[${productName}] 예약이 들어왔습니다.\n\n` +
       `기업명 : ${data.company || '-'}\n` +
       `예약자명 : ${data.name || '-'}\n` +
       `연락처 : ${data.phone || '-'}\n` +
@@ -257,8 +349,15 @@ function sendEmailNotification(data) {
       `객실 타입 : ${data.roomType || '-'}\n` +
       `입실일 : ${data.checkIn || '-'}\n` +
       `퇴실일 : ${data.checkOut || '-'}\n` +
-      `관광프로그램 : ${data.tourProgram || '-'}\n` +
-      `워케이션센터 일정 : ${data.workationSchedule || '-'}\n` +
+      `관광프로그램 : ${data.tourProgram || '-'}\n`;
+
+    if (data.product === 'andong') {
+      body += `관광인원 : 어른 ${data.tour_adult || 0} / 청소년 ${data.tour_teen || 0} / 어린이 ${data.tour_child || 0}\n` +
+        `조식 : 어른 ${data.breakfast_adult || 0} / 어린이 ${data.breakfast_child || 0}\n` +
+        `사우나 : 어른 ${data.sauna_adult || 0} / 어린이 ${data.sauna_child || 0}\n`;
+    }
+
+    body += `워케이션센터 일정 : ${data.workationSchedule || '-'}\n` +
       `기타 문의 : ${data.otherInquiry || '-'}\n` +
       `예상 가격 : ${data.estimatedPrice || '-'}\n` +
       `신청서 파일 : ${data.fileUrl || '-'}\n` +
@@ -281,7 +380,8 @@ function sendHotelInquiry(data) {
     const productNames = {
       'silla': '두런두런 워케이션 경주 신라레거시점',
       'silla-family': '두런두런 패밀리 워케이션 경주 신라레거시점',
-      'chilgok': '두런두런 워케이션 국립칠곡숲체원'
+      'chilgok': '두런두런 워케이션 국립칠곡숲체원',
+      'andong': '두런두런 워케이션 안동 스탠포드호텔'
     };
     const productName = productNames[data.product] || '두런두런 워케이션';
 
@@ -298,6 +398,11 @@ function sendHotelInquiry(data) {
 
     const subject = `[예약확인요청] ${productName} - ${data.company || ''} ${data.name || ''}`;
 
+    const andongExtraRows = (data.product === 'andong') ? `
+            <tr><td style="padding:10px;color:#888;">관광인원</td><td style="padding:10px;">어른 ${data.tour_adult || 0} / 청소년 ${data.tour_teen || 0} / 어린이 ${data.tour_child || 0}</td></tr>
+            <tr style="background:#f9f9f9;"><td style="padding:10px;color:#888;">조식</td><td style="padding:10px;">어른 ${data.breakfast_adult || 0} / 어린이 ${data.breakfast_child || 0}</td></tr>
+            <tr><td style="padding:10px;color:#888;">사우나</td><td style="padding:10px;">어른 ${data.sauna_adult || 0} / 어린이 ${data.sauna_child || 0}</td></tr>` : '';
+
     const htmlBody = `
       <div style="font-family:'Apple SD Gothic Neo',sans-serif;max-width:600px;margin:0 auto;">
         <div style="background:#1a5c3a;color:#fff;padding:24px;border-radius:12px 12px 0 0;">
@@ -312,7 +417,7 @@ function sendHotelInquiry(data) {
             <tr style="background:#f9f9f9;"><td style="padding:10px;color:#888;">숙박인원</td><td style="padding:10px;">${data.totalGuests || '-'}명</td></tr>
             <tr><td style="padding:10px;color:#888;">객실 타입</td><td style="padding:10px;font-weight:600;color:#1a5c3a;">${data.roomType || '-'}</td></tr>
             <tr style="background:#f9f9f9;"><td style="padding:10px;color:#888;">입실일</td><td style="padding:10px;font-weight:600;">${data.checkIn || '-'}</td></tr>
-            <tr><td style="padding:10px;color:#888;">퇴실일</td><td style="padding:10px;font-weight:600;">${data.checkOut || '-'}</td></tr>
+            <tr><td style="padding:10px;color:#888;">퇴실일</td><td style="padding:10px;font-weight:600;">${data.checkOut || '-'}</td></tr>${andongExtraRows}
           </table>
         </div>
         <div style="text-align:center;padding:30px;background:#f5f5f5;border-radius:0 0 12px 12px;">
