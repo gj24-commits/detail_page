@@ -37,9 +37,9 @@ export async function fetchChapter(book: string, chapter: number): Promise<Chapt
     if (!res.ok) return null;
 
     const data = await res.json();
-    const verses: Verse[] = Object.entries(data.verses || {}).map(([num, v]) => ({
-      verse: parseInt(num),
-      text: (v as { verse: string }).verse || '',
+    const verses: Verse[] = (data.verses || []).map((v: { verse: number; text: string }) => ({
+      verse: v.verse,
+      text: v.text || '',
     }));
 
     return { book, chapter, verses };
