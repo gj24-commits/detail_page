@@ -4,6 +4,31 @@ import { useState } from 'react';
 import { Passage } from '@/lib/mccheyne';
 import { ChapterContent, fetchChapter } from '@/lib/bibleApi';
 
+function CopyButton({ label, verses }: { label: string; verses: { verse: number; text: string }[] }) {
+  const [copied, setCopied] = useState(false);
+
+  function handleCopy() {
+    const first = verses[0]?.verse;
+    const last = verses[verses.length - 1]?.verse;
+    const range = first === last ? `${first}절` : `${first}~${last}절`;
+    const header = `[${label}:${range}]`;
+    const body = verses.map(v => `${v.verse} ${v.text}`).join('\n');
+    navigator.clipboard.writeText(`${header}\n${body}`).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
+
+  return (
+    <button
+      onClick={handleCopy}
+      className="mt-3 w-full flex items-center justify-center gap-1.5 py-2 rounded-xl border border-amber-200 bg-amber-50 text-amber-700 text-xs font-medium active:bg-amber-100 transition-colors"
+    >
+      {copied ? '✓ 복사됨' : '📋 구절 복사'}
+    </button>
+  );
+}
+
 interface PassageCardProps {
   passage: Passage;
   columnLabel: string;
@@ -58,14 +83,17 @@ export default function PassageCard({ passage, columnLabel, colorClass }: Passag
             </div>
           )}
           {content && (
-            <div className="space-y-2 max-h-96 overflow-y-auto pr-1">
-              {content.verses.map((v) => (
-                <p key={v.verse} className="text-sm leading-relaxed text-gray-700">
-                  <span className="text-xs text-amber-500 font-bold mr-1.5">{v.verse}</span>
-                  {v.text}
-                </p>
-              ))}
-            </div>
+            <>
+              <div className="space-y-2 max-h-96 overflow-y-auto pr-1">
+                {content.verses.map((v) => (
+                  <p key={v.verse} className="text-sm leading-relaxed text-gray-700">
+                    <span className="text-xs text-amber-500 font-bold mr-1.5">{v.verse}</span>
+                    {v.text}
+                  </p>
+                ))}
+              </div>
+              <CopyButton label={passage.label} verses={content.verses} />
+            </>
           )}
           {!loading && !content && (
             <p className="text-sm text-gray-400 text-center py-4">
