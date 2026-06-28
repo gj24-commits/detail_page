@@ -4,31 +4,6 @@ import { useState } from 'react';
 import { Passage } from '@/lib/mccheyne';
 import { ChapterContent, fetchChapter } from '@/lib/bibleApi';
 
-function CopyButton({ label, verses }: { label: string; verses: { verse: number; text: string }[] }) {
-  const [copied, setCopied] = useState(false);
-
-  function handleCopy() {
-    const first = verses[0]?.verse;
-    const last = verses[verses.length - 1]?.verse;
-    const range = first === last ? `${first}절` : `${first}~${last}절`;
-    const header = `[${label}:${range}]`;
-    const body = verses.map(v => `${v.verse} ${v.text}`).join('\n');
-    navigator.clipboard.writeText(`${header}\n${body}`).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    });
-  }
-
-  return (
-    <button
-      onClick={handleCopy}
-      className="mt-3 w-full flex items-center justify-center gap-1.5 py-2 rounded-xl border border-amber-200 bg-amber-50 text-amber-700 text-xs font-medium active:bg-amber-100 transition-colors"
-    >
-      {copied ? '✓ 복사됨' : '📋 구절 복사'}
-    </button>
-  );
-}
-
 interface PassageCardProps {
   passage: Passage;
   columnLabel: string;
@@ -39,10 +14,13 @@ export default function PassageCard({ passage, columnLabel, colorClass }: Passag
   const [content, setContent] = useState<ChapterContent | null>(null);
   const [loading, setLoading] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [selected, setSelected] = useState<Set<number>>(new Set());
+  const [copied, setCopied] = useState(false);
 
   async function handleToggle() {
     if (expanded) {
       setExpanded(false);
+      setSelected(new Set());
       return;
     }
     if (!content) {
@@ -52,6 +30,31 @@ export default function PassageCard({ passage, columnLabel, colorClass }: Passag
       setLoading(false);
     }
     setExpanded(true);
+  }
+
+  function toggleVerse(verseNum: number) {
+    setSelected(prev => {
+      const next = new Set(prev);
+      if (next.has(verseNum)) next.delete(verseNum);
+      else next.add(verseNum);
+      return next;
+    });
+    setCopied(false);
+  }
+
+  function handleCopy() {
+    if (!content || selected.size === 0) return;
+    const picked = content.verses.filter(v => selected.has(v.verse));
+    const nums = picked.map(v => v.verse).sort((a, b) => a - b);
+    const first = nums[0];
+    const last = nums[nums.length - 1];
+    const range = first === last ? `${first}절` : `${first}~${last}절`;
+    const header = `[${passage.label}:${range}]`;
+    const body = picked.map(v => `${v.verse} ${v.text}`).join('\n');
+    navigator.clipboard.writeText(`${header}\n${body}`).then(() => {
+      setCopied(true);
+      setTimeout(() => { setCopied(false); setSelected(new Set()); }, 2000);
+    });
   }
 
   return (
@@ -77,6 +80,9 @@ export default function PassageCard({ passage, columnLabel, colorClass }: Passag
       {expanded && (
         <div className="px-4 pb-4">
           <div className="h-px bg-gray-100 mb-3" />
+          {content && selected.size === 0 && (
+            <p className="text-xs text-gray-400 text-center mb-2">절을 탭해서 선택하세요</p>
+          )}
           {loading && (
             <div className="flex items-center justify-center py-8">
               <div className="w-6 h-6 border-2 border-amber-400 border-t-transparent rounded-full animate-spin" />
@@ -84,15 +90,36 @@ export default function PassageCard({ passage, columnLabel, colorClass }: Passag
           )}
           {content && (
             <>
-              <div className="space-y-2 max-h-96 overflow-y-auto pr-1">
-                {content.verses.map((v) => (
-                  <p key={v.verse} className="text-sm leading-relaxed text-gray-700">
-                    <span className="text-xs text-amber-500 font-bold mr-1.5">{v.verse}</span>
-                    {v.text}
-                  </p>
-                ))}
+              <div className="space-y-1 max-h-96 overflow-y-auto pr-1">
+                {content.verses.map((v) => {
+                  const isSelected = selected.has(v.verse);
+                  return (
+                    <p
+                      key={v.verse}
+                      onClick={() => toggleVerse(v.verse)}
+                      className={`text-sm leading-relaxed rounded-lg px-2 py-1 cursor-pointer transition-colors ${
+                        isSelected
+                          ? 'bg-amber-100 text-gray-800'
+                          : 'text-gray-700 active:bg-gray-50'
+                      }`}
+                    >
+                      <span className={`text-xs font-bold mr-1.5 ${isSelected ? 'text-amber-600' : 'text-amber-400'}`}>
+                        {v.verse}
+                      </span>
+                      {v.text}
+                    </p>
+                  );
+                })}
               </div>
-              <CopyButton label={passage.label} verses={content.verses} />
+
+              {selected.size > 0 && (
+                <button
+                  onClick={handleCopy}
+                  className="mt-3 w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-amber-300 bg-amber-50 text-amber-700 text-xs font-semibold active:bg-amber-100 transition-colors"
+                >
+                  {copied ? '✓ 복사됨' : `📋 ${selected.size}절 복사`}
+                </button>
+              )}
             </>
           )}
           {!loading && !content && (
