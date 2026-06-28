@@ -41,7 +41,7 @@ setInterval(() => {
         body: `${labelPart}${cheerText}`,
         icon: '/icons/icon-192.png',
         badge: '/icons/icon-192.png',
-        image: self.location.origin + '/jesus-cheer.svg',
+        image: self.location.origin + '/jesus-alarm.png',
         tag: `daily-bible-${alarm.id}`,
         renotify: true,
         vibrate: [300, 100, 300, 100, 300],
