@@ -6,10 +6,19 @@ export default function ServiceWorkerRegister() {
   useEffect(() => {
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js').then((reg) => {
-        // Re-send saved notification time after SW registration
-        const savedTime = localStorage.getItem('notif-time');
-        if (savedTime && reg.active) {
-          reg.active.postMessage({ type: 'SCHEDULE_NOTIFICATION', time: savedTime });
+        const savedAlarms = localStorage.getItem('alarms');
+        if (savedAlarms) {
+          try {
+            const alarms = JSON.parse(savedAlarms);
+            const target = reg.active || reg.installing || reg.waiting;
+            if (target) {
+              target.postMessage({ type: 'UPDATE_ALARMS', alarms });
+            } else {
+              navigator.serviceWorker.addEventListener('controllerchange', () => {
+                navigator.serviceWorker.controller?.postMessage({ type: 'UPDATE_ALARMS', alarms });
+              }, { once: true });
+            }
+          } catch {}
         }
       });
     }
