@@ -1,6 +1,7 @@
 import { getDayReading, formatDateKorean } from '@/lib/mccheyne';
 import PassageCard from '@/components/PassageCard';
 import NotificationButton from '@/components/NotificationButton';
+import JesusCharacter from '@/components/JesusCharacter';
 
 const COLUMN_LABELS = ['가정 구약', '가정 신약', '개인 구약', '개인 신약'];
 const COLUMN_COLORS = [
@@ -20,13 +21,18 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-amber-50">
       {/* Header */}
-      <div className="bg-gradient-to-b from-amber-700 to-amber-600 text-white px-5 pt-14 pb-8">
+      <div className="bg-gradient-to-b from-amber-700 to-amber-600 text-white px-5 pt-14 pb-20">
         <p className="text-amber-200 text-xs font-medium mb-1 tracking-wide">맥체인 성경읽기</p>
         <h1 className="text-2xl font-bold mb-1">오늘의 말씀</h1>
         <p className="text-amber-200 text-sm">{dateStr}</p>
       </div>
 
-      <div className="px-4 -mt-4 pb-8 space-y-3">
+      <div className="px-4 -mt-14 pb-8 space-y-3">
+        {/* Jesus character card */}
+        <div className="bg-white rounded-2xl shadow-md border border-amber-100">
+          <JesusCharacter />
+        </div>
+
         {/* Quick overview */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
           <p className="text-xs font-semibold text-gray-500 mb-2">오늘 읽을 말씀</p>
