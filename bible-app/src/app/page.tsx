@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { getDayReading, formatDateKorean } from '@/lib/mccheyne';
 import PassageCard from '@/components/PassageCard';
 import NotificationButton from '@/components/NotificationButton';

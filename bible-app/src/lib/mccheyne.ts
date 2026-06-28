@@ -18,9 +18,14 @@ export interface DayReading {
 
 const plan = planData as Record<string, DayReading>;
 
+// Always compute in KST (Asia/Seoul, UTC+9) regardless of server timezone
+function toKST(date: Date): Date {
+  return new Date(date.toLocaleString('en-US', { timeZone: 'Asia/Seoul' }));
+}
+
 export function getTodayKey(date?: Date): string {
-  const d = date || new Date();
-  return `${d.getMonth() + 1}-${d.getDate()}`;
+  const kst = toKST(date || new Date());
+  return `${kst.getMonth() + 1}-${kst.getDate()}`;
 }
 
 export function getDayReading(date?: Date): DayReading {
@@ -34,6 +39,7 @@ export function getReadingByKey(key: string): DayReading | null {
 
 export function formatDateKorean(date: Date): string {
   return date.toLocaleDateString('ko-KR', {
+    timeZone: 'Asia/Seoul',
     year: 'numeric',
     month: 'long',
     day: 'numeric',
