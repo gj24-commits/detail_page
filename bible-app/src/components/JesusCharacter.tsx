@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 type Pose = 'wave' | 'pray' | 'cheer';
 
@@ -31,8 +31,7 @@ const SCENES: Scene[] = [
   },
 ];
 
-// All frame paths for preloading
-const ALL_FRAMES = SCENES.flatMap(s => s.frames).filter((v, i, a) => a.indexOf(v) === i);
+const ALL_FRAMES = Array.from(new Set(SCENES.flatMap(s => s.frames)));
 
 const FRAME_MS = 250;
 const SCENE_MS = 4000;
@@ -41,7 +40,17 @@ export default function JesusCharacter() {
   const [sceneIdx, setSceneIdx] = useState(0);
   const [frameIdx, setFrameIdx] = useState(0);
   const [visible, setVisible] = useState(true);
+  const imgRef = useRef<HTMLImageElement>(null);
 
+  // Preload all frames into browser cache on mount
+  useEffect(() => {
+    ALL_FRAMES.forEach(src => {
+      const img = new window.Image();
+      img.src = src;
+    });
+  }, []);
+
+  // Sprite frame ticker
   useEffect(() => {
     const tid = setInterval(() => {
       setFrameIdx(f => (f + 1) % SCENES[sceneIdx].frames.length);
@@ -49,6 +58,7 @@ export default function JesusCharacter() {
     return () => clearInterval(tid);
   }, [sceneIdx]);
 
+  // Scene switcher
   useEffect(() => {
     const sid = setInterval(() => {
       setVisible(false);
@@ -62,40 +72,34 @@ export default function JesusCharacter() {
   }, []);
 
   const scene = SCENES[sceneIdx];
-  const currentSrc = scene.frames[frameIdx];
+  const src = scene.frames[frameIdx];
 
   return (
     <div className="flex flex-col items-center gap-2 py-5 select-none">
-      {/* Character */}
+      {/* Character — single <img>, src swaps via browser cache */}
       <div
         className={scene.anim}
         style={{
           opacity: visible ? 1 : 0,
           transform: visible ? 'translateY(0)' : 'translateY(-8px)',
           transition: 'opacity 0.35s ease, transform 0.35s ease',
-          width: 140,
-          height: 160,
-          position: 'relative',
+          width: 200,
+          height: 200,
+          flexShrink: 0,
         }}
       >
-        {/* All frames in DOM (preloaded), only current is visible */}
-        {ALL_FRAMES.map(src => (
-          <img
-            key={src}
-            src={src}
-            alt={src === currentSrc ? '예수님 캐릭터' : ''}
-            style={{
-              position: 'absolute',
-              inset: 0,
-              width: '100%',
-              height: '100%',
-              objectFit: 'contain',
-              imageRendering: 'pixelated',
-              opacity: src === currentSrc ? 1 : 0,
-              pointerEvents: 'none',
-            }}
-          />
-        ))}
+        <img
+          ref={imgRef}
+          src={src}
+          alt="예수님 캐릭터"
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'contain',
+            imageRendering: 'pixelated',
+            display: 'block',
+          }}
+        />
       </div>
 
       {/* Speech bubble */}
