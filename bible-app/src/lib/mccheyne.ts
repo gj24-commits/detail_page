@@ -46,3 +46,18 @@ export function formatDateKorean(date: Date): string {
     weekday: 'long',
   });
 }
+
+export function formatKeyKorean(key: string): string {
+  const [m, d] = key.split('-').map(Number);
+  const date = new Date(2023, m - 1, d);
+  return date.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'long' });
+}
+
+export function getAdjacentKey(key: string, delta: number): string {
+  const [m, d] = key.split('-').map(Number);
+  const date = new Date(2023, m - 1, d);
+  date.setDate(date.getDate() + delta);
+  // wrap: plan covers Jan 1 – Dec 31 (365 days, non-leap 2023)
+  const key2 = `${date.getMonth() + 1}-${date.getDate()}`;
+  return plan[key2] ? key2 : key;
+}
