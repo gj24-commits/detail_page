@@ -1,8 +1,14 @@
-export const dynamic = 'force-dynamic';
+'use client';
 
-import { getTodayKey } from '@/lib/mccheyne';
-import { redirect } from 'next/navigation';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function Home() {
-  redirect(`/daily/${getTodayKey()}`);
+  const router = useRouter();
+  useEffect(() => {
+    const now = new Date();
+    const key = `${now.getMonth() + 1}-${now.getDate()}`;
+    router.replace(`/daily/${key}`);
+  }, [router]);
+  return <div className="min-h-screen bg-amber-50" />;
 }
