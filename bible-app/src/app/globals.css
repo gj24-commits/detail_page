@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+@keyframes jesus-float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-9px); }
+}
+@keyframes jesus-sway {
+  0%, 100% { transform: rotate(-4deg); }
+  50% { transform: rotate(4deg); }
+}
+@keyframes jesus-bounce {
+  0%, 100% { transform: translateY(0px) scale(1); }
+  25% { transform: translateY(-14px) scale(1.04); }
+  50% { transform: translateY(-6px) scale(1); }
+  75% { transform: translateY(-11px) scale(1.02); }
+}
+.jesus-float  { animation: jesus-float  3s ease-in-out infinite; }
+.jesus-sway   { animation: jesus-sway   2s ease-in-out infinite; transform-origin: bottom center; }
+.jesus-bounce { animation: jesus-bounce 1.1s ease-in-out infinite; }

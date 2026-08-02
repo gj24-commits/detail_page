@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 192" width="320" height="192">
+  <!-- warm background -->
+  <rect width="320" height="192" fill="#FFFBF0" rx="0"/>
+  <!-- decorative glow circles -->
+  <circle cx="80"  cy="96"  r="76"  fill="#FDE68A" opacity="0.35"/>
+  <circle cx="260" cy="50"  r="55"  fill="#FCD34D" opacity="0.25"/>
+  <circle cx="270" cy="160" r="48"  fill="#FDE68A" opacity="0.3"/>
+
+  <!-- Jesus character (cheer pose) — 64x96 viewBox scaled 1.8x, centered-left -->
+  <g transform="translate(8,0) scale(1.8)">
+    <!-- side hair -->
+    <rect x="7"  y="18" width="8" height="34" rx="5" fill="#5D3118"/>
+    <rect x="49" y="18" width="8" height="34" rx="5" fill="#5D3118"/>
+    <!-- top hair -->
+    <ellipse cx="32" cy="13" rx="22" ry="16" fill="#5D3118"/>
+    <!-- face -->
+    <circle cx="32" cy="20" r="16" fill="#F5C5A3"/>
+    <!-- eyes (cheer happy arcs) -->
+    <path d="M21 16.5 Q24.5 22 28 16.5" stroke="#2C1510" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <path d="M36 16.5 Q39.5 22 43 16.5" stroke="#2C1510" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <!-- cheeks -->
+    <circle cx="18" cy="24" r="5" fill="#F08080" opacity="0.4"/>
+    <circle cx="46" cy="24" r="5" fill="#F08080" opacity="0.4"/>
+    <!-- nose -->
+    <circle cx="32" cy="24" r="2.2" fill="#E8A880"/>
+    <!-- beard -->
+    <ellipse cx="32" cy="37" rx="14" ry="9" fill="#6B3A1A"/>
+    <!-- mouth (big smile) -->
+    <path d="M25 28 Q32 36 39 28" stroke="#2C1510" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+    <!-- body robe -->
+    <rect x="10" y="42" width="44" height="52" rx="7" fill="#EEE8D5"/>
+    <!-- sash -->
+    <polygon points="16,42 24,42 48,93 40,93" fill="#8B1A1A" opacity="0.9"/>
+    <!-- arms raised (cheer) -->
+    <polygon points="7,44 16,44 8,20 1,22"   fill="#EEE8D5"/>
+    <polygon points="48,44 57,44 63,22 56,20" fill="#EEE8D5"/>
+    <!-- hands raised -->
+    <circle cx="4"  cy="19" r="5" fill="#F5C5A3"/>
+    <circle cx="60" cy="19" r="5" fill="#F5C5A3"/>
+    <!-- sandals -->
+    <ellipse cx="22" cy="93" rx="10" ry="4" fill="#7A5030"/>
+    <ellipse cx="42" cy="93" rx="10" ry="4" fill="#7A5030"/>
+    <!-- sparkles -->
+    <text x="-4" y="14" font-size="12" font-family="serif">✨</text>
+    <text x="48" y="14" font-size="12" font-family="serif">✨</text>
+    <text x="50" y="52" font-size="10" font-family="serif">⭐</text>
+  </g>
+
+  <!-- encouraging text (right side) -->
+  <text x="218" y="72"  text-anchor="middle" font-family="sans-serif" font-size="26" font-weight="bold" fill="#92400E">화이팅! 💪</text>
+  <text x="218" y="104" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#92400E">오늘 말씀을 읽을 시간이에요</text>
+  <text x="218" y="128" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#B45309">📖 맥체인 성경읽기</text>
+  <text x="218" y="158" text-anchor="middle" font-family="sans-serif" font-size="20" fill="#D97706">✨  ✨</text>
+</svg>
