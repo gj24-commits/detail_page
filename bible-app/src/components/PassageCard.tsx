@@ -106,7 +106,17 @@ export default function PassageCard({ passage, columnLabel, colorClass }: Passag
                       <span className={`text-xs font-bold mr-1.5 ${isSelected ? 'text-amber-600' : 'text-amber-400'}`}>
                         {v.verse}
                       </span>
-                      {v.text}
+                      {v.wj ? (
+                        <>
+                          {v.text.slice(0, v.wj[0])}
+                          <span className="text-orange-600 font-medium">
+                            {v.text.slice(v.wj[0], v.wj[1])}
+                          </span>
+                          {v.text.slice(v.wj[1])}
+                        </>
+                      ) : (
+                        v.text
+                      )}
                     </p>
                   );
                 })}

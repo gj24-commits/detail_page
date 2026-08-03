@@ -14,19 +14,19 @@ const SCENES: Scene[] = [
   {
     pose: 'wave',
     frames: ['/jesus-wave.png', '/jesus-wave2.png', '/jesus-wave3.png', '/jesus-wave2.png'],
-    text: '안녕하세요! 오늘도 말씀으로 시작해요 ☀️',
+    text: '오늘도 말씀으로 시작해요 ☀️',
     anim: 'jesus-float',
   },
   {
     pose: 'pray',
     frames: ['/jesus-pray.png', '/jesus-pray2.png', '/jesus-pray3.png', '/jesus-pray2.png'],
-    text: '주님의 말씀이 오늘 하루를 인도하실 거예요 🙏',
+    text: '말씀이 오늘을 인도하실 거예요 🙏',
     anim: 'jesus-sway',
   },
   {
     pose: 'cheer',
     frames: ['/jesus-cheer.png', '/jesus-cheer2.png', '/jesus-cheer3.png', '/jesus-cheer2.png'],
-    text: '오늘 말씀 읽기 화이팅! 할 수 있어요 ✨',
+    text: '오늘 말씀 읽기 화이팅! ✨',
     anim: 'jesus-bounce',
   },
 ];
@@ -109,8 +109,14 @@ export default function JesusCharacter() {
           transform: visible ? 'translateY(0)' : 'translateY(4px)',
           transition: 'opacity 0.35s ease 0.1s, transform 0.35s ease 0.1s',
           position: 'relative',
+          // Fixed height + nowrap: the bubble is always exactly one line, so
+          // the cards below never shift when the message changes.
+          height: 40,
+          display: 'flex',
+          alignItems: 'center',
+          maxWidth: '100%',
         }}
-        className="bg-white border border-amber-200 rounded-2xl px-4 py-2.5 shadow-sm max-w-[240px] text-center"
+        className="bg-white border border-amber-200 rounded-2xl px-4 shadow-sm text-center"
       >
         <div style={{
           position: 'absolute', top: -9, left: '50%',
@@ -128,7 +134,7 @@ export default function JesusCharacter() {
           borderRight: '6px solid transparent',
           borderBottom: '7px solid white',
         }} />
-        <p className="text-xs text-amber-800 font-medium leading-relaxed">{scene.text}</p>
+        <p className="text-xs text-amber-800 font-medium whitespace-nowrap">{scene.text}</p>
       </div>
     </div>
   );
