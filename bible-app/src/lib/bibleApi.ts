@@ -1,7 +1,12 @@
 // getbible.net v2 API for Korean Bible text
 import jesusWordsData from '@/data/jesusWords.json';
+import headingsData from '@/data/headings.json';
 
 const API_BASE = 'https://api.getbible.net/v2';
+
+// "Mar:16" -> [[startVerse, 소제목], ...]. Pericope boundaries come from the
+// public-domain Berean Standard Bible; the Korean titles are written for this app.
+const headings = headingsData as unknown as Record<string, [number, string][]>;
 
 // "Mat:5" -> verse numbers that contain words spoken by Jesus.
 // Derived from the World English Bible's \wj (words of Jesus) markers.
@@ -77,6 +82,8 @@ export interface ChapterContent {
   book: string;
   chapter: number;
   verses: Verse[];
+  /** Verse number -> 소제목 shown above that verse. */
+  headings: Record<number, string>;
 }
 
 export async function fetchChapter(book: string, chapter: number): Promise<ChapterContent | null> {
@@ -97,7 +104,12 @@ export async function fetchChapter(book: string, chapter: number): Promise<Chapt
       return wj ? { verse: v.verse, text, wj } : { verse: v.verse, text };
     });
 
-    return { book, chapter, verses };
+    const chapterHeadings: Record<number, string> = {};
+    for (const [verse, title] of headings[`${book}:${chapter}`] || []) {
+      chapterHeadings[verse] = title;
+    }
+
+    return { book, chapter, verses, headings: chapterHeadings };
   } catch {
     return null;
   }
