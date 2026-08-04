@@ -93,9 +93,15 @@ export default function PassageCard({ passage, columnLabel, colorClass }: Passag
               <div className="space-y-1 max-h-96 overflow-y-auto pr-1">
                 {content.verses.map((v) => {
                   const isSelected = selected.has(v.verse);
+                  const heading = content.headings[v.verse];
                   return (
+                    <div key={v.verse}>
+                    {heading && (
+                      <p className="text-xs font-bold text-gray-500 mt-3 mb-1 px-2 first:mt-0">
+                        {heading}
+                      </p>
+                    )}
                     <p
-                      key={v.verse}
                       onClick={() => toggleVerse(v.verse)}
                       className={`text-sm leading-relaxed rounded-lg px-2 py-1 cursor-pointer transition-colors ${
                         isSelected
@@ -106,8 +112,19 @@ export default function PassageCard({ passage, columnLabel, colorClass }: Passag
                       <span className={`text-xs font-bold mr-1.5 ${isSelected ? 'text-amber-600' : 'text-amber-400'}`}>
                         {v.verse}
                       </span>
-                      {v.text}
+                      {v.wj ? (
+                        <>
+                          {v.text.slice(0, v.wj[0])}
+                          <span className="text-orange-600 font-medium">
+                            {v.text.slice(v.wj[0], v.wj[1])}
+                          </span>
+                          {v.text.slice(v.wj[1])}
+                        </>
+                      ) : (
+                        v.text
+                      )}
                     </p>
+                    </div>
                   );
                 })}
               </div>
